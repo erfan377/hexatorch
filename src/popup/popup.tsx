@@ -25,9 +25,20 @@ class NameForm extends React.Component<{}, { value: string }> {
     this.setState({value: event.target.value});
   }
 
+
+  //Todo handle blocklist
   handleSubmit(event) {
-    console.log('erfan was here');
-    alert('A name was submitted: ' + this.state.value); //error here
+
+    // This is for approve
+    chrome.runtime.sendMessage({foo: {type: 'addToSafeList', value: this.state.value}}, response => {
+      if (response === 'true'){
+        // TODO: Show new page
+        console.log('yayyy')
+      } else {
+        // TODO: Show it existed
+        console.log('oh no')
+      }
+    });
     event.preventDefault();
   }
 

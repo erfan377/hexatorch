@@ -89,7 +89,21 @@ chrome.runtime.onInstalled.addListener(() => {
       
     }
 
+    chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+      if (msg.foo.type === 'addToSafeList') {
+        console.log('first', msg.foo.value)
+
+        // TODO: do appropriate checks
+        addURL(msg.foo.value, "approvedlist");
+
+        //TODO: if addURL === true then sendResponse('true') else sendResponse('false')
+        sendResponse('true');
+      }
+    });
+
+    //TODO: make this intro a if statement for response
     function addURL(newURL,listtype) {
+      console.log('adding URL');
       if (listtype=="approvedlist"){
         if (localApprovedlist.includes(newURL)){
           console.log("URL already exists in approvedlist");
@@ -109,8 +123,8 @@ chrome.runtime.onInstalled.addListener(() => {
           chrome.storage.local.set({"blockedlist":localBlockedlist});
         }
       }
-      
     }
+
     chrome.tabs.onRemoved.addListener(function(tabId) {
       var removed = tabIdToURL[tabId];
       delete tabIdToURL[tabId];
