@@ -8,8 +8,8 @@ chrome.runtime.onInstalled.addListener(() => {
     var tabIdToURL = {};
     var currentTabId = -1;
 
-    var localWhiteList = [];
-    var localBlackList = [];
+    var localApprovedlist = [];
+    var localBlockedlist = [];
 
     var currentHost;
     var currentUrl;
@@ -17,96 +17,96 @@ chrome.runtime.onInstalled.addListener(() => {
     const processingTabId = {};
 
     function fetchLocal(listype){
-      if (listype=="whitelist"){
-        chrome.storage.local.get(["whitelist"], (res) => {
-          const isExist = res.whitelist ?? true
+      if (listype=="approvedlist"){
+        chrome.storage.local.get(["approvedlist"], (res) => {
+          const isExist = res.approvedlist ?? true
           if (isExist){
-            localWhiteList = res.whitelist;
+            localApprovedlist = res.approvedlist;
           }
           else{
-            console.log("whitelist is empty");
+            console.log("approvedlist is empty");
           }
         });
       }
-      else if (listype=="blacklist"){
-        chrome.storage.local.get(["blacklist"], (res) => {
-          const isExist = res.blacklist ?? true
+      else if (listype=="blockedlist"){
+        chrome.storage.local.get(["blockedlist"], (res) => {
+          const isExist = res.blockedlist ?? true
           if (isExist){
-            localBlackList = res.blacklist;
+            localBlockedlist = res.blockedlist;
           }
           else{
-            console.log("blacklist is empty");
+            console.log("blockedlist is empty");
           }
         });
       }
     }
 
     function deleteURL(newURL,listtype) {
-      if (listtype=="whitelist"){
-        if (localWhiteList.includes(newURL)){
-          var idx = localWhiteList.indexOf(newURL);
-          if (idx != -1) localWhiteList.splice(idx, 1);
-          chrome.storage.local.set({"whitelist":localWhiteList});
+      if (listtype=="approvedlist"){
+        if (localApprovedlist.includes(newURL)){
+          var idx = localApprovedlist.indexOf(newURL);
+          if (idx != -1) localApprovedlist.splice(idx, 1);
+          chrome.storage.local.set({"approvedlist":localApprovedlist});
         }
         else{
-          console.log("URLs does not exist in whitelist");
+          console.log("URLs does not exist in approvedlist");
         }
       }
-      else if (listtype=="blacklist"){
-        if (localBlackList.includes(newURL)){
-          var idx = localBlackList.indexOf(newURL);
-          if (idx != -1) localBlackList.splice(idx, 1);
-          chrome.storage.local.set({"blacklist":localBlackList});
+      else if (listtype=="blockedlist"){
+        if (localBlockedlist.includes(newURL)){
+          var idx = localBlockedlist.indexOf(newURL);
+          if (idx != -1) localBlockedlist.splice(idx, 1);
+          chrome.storage.local.set({"blockedlist":localBlockedlist});
         }
         else{
-          console.log("URLs does not exist in blacklist");
+          console.log("URLs does not exist in blockedlist");
         }
       }
       
     }
 
     function updateURL(oldURL,newURL,listtype) {
-      if (listtype=="whitelist"){
-        if (localWhiteList.includes(oldURL)){
-          var idx = localWhiteList.indexOf(oldURL);
-          if (idx != -1) localWhiteList[idx]=newURL;
-          chrome.storage.local.set({"whitelist":localWhiteList});
+      if (listtype=="approvedlist"){
+        if (localApprovedlist.includes(oldURL)){
+          var idx = localApprovedlist.indexOf(oldURL);
+          if (idx != -1) localApprovedlist[idx]=newURL;
+          chrome.storage.local.set({"approvedlist":localApprovedlist});
         }
         else{
-          console.log("URLs does not exist in whitelist");
+          console.log("URL does not exist in approvedlist");
         }
       }
-      else if (listtype=="blacklist"){
-        if (localBlackList.includes(newURL)){
-          var idx = localBlackList.indexOf(newURL);
-          if (idx != -1) localBlackList[idx]=newURL;
-          chrome.storage.local.set({"blacklist":localBlackList});
+      else if (listtype=="blockedlist"){
+        if (localBlockedlist.includes(newURL)){
+          var idx = localBlockedlist.indexOf(newURL);
+          if (idx != -1) localBlockedlist[idx]=newURL;
+          chrome.storage.local.set({"blockedlist":localBlockedlist});
         }
         else{
-          console.log("URLs does not exist in blacklist");
+          console.log("URL does not exist in blockedlist");
         }
       }
       
     }
 
     function addURL(newURL,listtype) {
-      if (listtype=="whitelist"){
-        if (localWhiteList.includes(newURL)){
-          console.log("URL already exists in whitelist");
+      if (listtype=="approvedlist"){
+        if (localApprovedlist.includes(newURL)){
+          console.log("URL already exists in approvedlist");
 
         }
         else{
-          localWhiteList.push(newURL);
-          chrome.storage.local.set({"whitelist":localWhiteList});
+          localApprovedlist.push(newURL);
+          chrome.storage.local.set({"approvedlist":localApprovedlist});
         }
       }
-      else if (listtype=="blacklist"){
-        if (localBlackList.includes(newURL)){
-          console.log("URL already exists in blacklist");
+      else if (listtype=="blockedlist"){
+        if (localBlockedlist.includes(newURL)){
+          console.log("URL already exists in blockedlist");
         }
         else{
-          localBlackList.push(newURL);
-          chrome.storage.local.set({"blacklist":localBlackList});
+          localBlockedlist.push(newURL);
+          chrome.storage.local.set({"blockedlist":localBlockedlist});
         }
       }
       
@@ -114,7 +114,7 @@ chrome.runtime.onInstalled.addListener(() => {
     chrome.tabs.onRemoved.addListener(function(tabId) {
       var removed = tabIdToURL[tabId];
       delete tabIdToURL[tabId];
-      console.log("tabs removed "+removed);
+      console.log("tabs removed ", removed);
     });
 
     chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab){
@@ -137,22 +137,26 @@ chrome.runtime.onInstalled.addListener(() => {
 
     function checkURL(currelhost){
 
-      var results = {"inUserWhitelist":false,
-                    "inUserBlacklist":false,
-                    "inServerWhitelist":false,
-                    "inServerBlacklist":false};
+      var results = {"inUserApprovedlist":false,
+                    "inUserBlockedlist":false,
+                    "inServerApprovedlist":false,
+                    "inServerBlockedlist":false};
 
-      if (localWhiteList.includes(currelhost)){
-        results["inUserWhitelist"] = true;
+      if (localApprovedlist.includes(currelhost)){
+        results["inUserApprovedlist"] = true;
       }
 
-      if (localBlackList.includes(currelhost)){
-        results["inUserBlacklist"] = true;
+      if (localBlockedlist.includes(currelhost)){
+        results["inUserBlockedlist"] = true;
       }
 
-      // to add: inServerWhitelist
-
-      // to add: inServerBlacklist
+      if (serverLookup("malicious_links", currelhost)){
+        results["inServerBlockedlist"] = true;
+      }
+      
+      if (serverLookup("approved_links", currelhost)){
+        results["inServerApprovedlist"] = true;
+      }
 
       return results;
 
@@ -167,40 +171,37 @@ chrome.runtime.onInstalled.addListener(() => {
       currentHost = tabIdToURL[tabId];
       //currentUrl = tab.url;
 
-      console.log("URL changed: "+currentHost);
+      console.log("URL changed: ", currentHost);
       //let result = checkURL(currentHost);
 
-      
       delete processingTabId[tabId];
     }
 
 
-
     const firebaseConfig = {
-        apiKey: "AIzaSyBCB4wc68n3VKUsrPWezCTkH2nGfBxQSEo",
-        authDomain: "lighthouse-758b0.firebaseapp.com",
-        projectId: "lighthouse-758b0",
-        storageBucket: "lighthouse-758b0.appspot.com",
-        messagingSenderId: "306456488253",
-        appId: "1:306456488253:web:df9e0025487e924aecbd54",
-        measurementId: "G-PF5BB7ZBN5"
+      apiKey: "AIzaSyBCB4wc68n3VKUsrPWezCTkH2nGfBxQSEo",
+      authDomain: "lighthouse-758b0.firebaseapp.com",
+      projectId: "lighthouse-758b0",
+      storageBucket: "lighthouse-758b0.appspot.com",
+      messagingSenderId: "306456488253",
+      appId: "1:306456488253:web:df9e0025487e924aecbd54",
+      measurementId: "G-PF5BB7ZBN5"
     };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore();
     
-    let link = "cryptoslam.io";
-    async function lookup(collection_name) {
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore();    
+
+    async function serverLookup(collection_name, url) {
       // Initialize Firebase
       const approvedRef = collection(db, collection_name);
-      const nameQuery = query(approvedRef, where("URL", "==", link));
+      const nameQuery = query(approvedRef, where("URL", "==", url));
       const querySnapshot = await getDocs(nameQuery);
+
       querySnapshot.forEach((doc) => {
-        console.log('Found', doc.data()['URL'], 'in', collection_name);
+        return true;
       });
+      return false;
     }
-    //should return a bool value at least
-    lookup("approved_links");
-    lookup("malicious_links");
+    
 
 });
