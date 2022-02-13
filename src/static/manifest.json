@@ -13,15 +13,23 @@
     "default_title": "React Extension",
     "default_icon": "icon.png"
   },
-  "permissions": ["storage"],
+  "permissions": ["storage",
+                  "activeTab"],
   "options_page": "options.html",
   "background": {
     "service_worker": "background.js"
   },
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
-      "js": ["contentScript.js"]
+      "matches": [
+        "http://*/",
+        "https://*/"
+      ],
+      "js": [
+        "contentScript.js"
+      ]
     }
   ]
 }
+
+
