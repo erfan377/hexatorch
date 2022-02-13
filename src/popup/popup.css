@@ -1,3 +1,43 @@
 body {
-  background-color: #1c1c1c;
+  flex-direction: column;
+  background-color: 'white';
+  height: 400px;
+  width: 400px;
+  margin: 0px;
+  border-radius: 10px;
+  align-content: center;
+}
+.header {
+  background-color: #2C02A7;
+  color: #FFFFFF;
+  height: 65px;
+  width: 400px;
+  margin-top: 0px;
+  margin-left: 0px;
+  margin-right: 0px;
+  margin-bottom: 20px;
+}
+.gaspricetitle {
+  position: relative;
+  top: 10px;
+  margin-left: 10px;
+  margin-top: 10px;
+  font-size: 18px;
+  text-align: center;
+
+}
+.gasprice {
+  position: relative;
+  top: 10px;
+  margin-left: 10px;
+  margin-top: 10px;
+  font-size: 18px;
+  font-weight: bold;
+}
+.logo {
+  height: 170px;
+  width: 200px;
+  align-self: center;
+  margin-left: 100px;
+  margin-top: 30px;
 }
