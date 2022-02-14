@@ -99,7 +99,29 @@ chrome.runtime.onInstalled.addListener(() => {
         //TODO: if addURL === true then sendResponse('true') else sendResponse('false')
         sendResponse('true');
       }
+      if (msg.foo.type === 'checkAddress') {
+        //TODO check URL and return 'found good' or 'found bad' or 'not found'
+        sendResponse('fnot found');
+      }
     });
+
+
+
+
+
+
+    chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+      if (msg.foo.type === 'addToSafeList') {
+        console.log('first', msg.foo.value)
+
+        // TODO: do appropriate checks
+        addURL(msg.foo.value, "approvedlist");
+
+        //TODO: if addURL === true then sendResponse('true') else sendResponse('false')
+        sendResponse('true');
+      }
+    });
+
 
     //TODO: make this intro a if statement for response
     function addURL(newURL,listtype) {
@@ -186,6 +208,7 @@ chrome.runtime.onInstalled.addListener(() => {
       //currentUrl = tab.url;
 
       console.log("URL changed: ", currentHost);
+
       //let result = checkURL(currentHost);
 
       delete processingTabId[tabId];
