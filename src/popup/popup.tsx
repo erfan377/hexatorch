@@ -1,5 +1,4 @@
-
-import React, {Component, useEffect, useState,MouseEvent} from 'react'
+import React, {Component, useEffect, useState} from 'react'
 import ReactDOM from 'react-dom'
 import  './popup.css'
 import logo from "./logo.jpg";
@@ -22,34 +21,48 @@ const NameForm = () => {
   //   this.handleSubmit = this.handleSubmit.bind(this);
   // }
 
-
-
-  const [value, setValue] = useState({value: ''});
+  const [value, setValue] = useState('');
+  const [addressBar, setAddressBar] = useState('');
   const [showApprove, setShowApprove] = useState(false);
   const [showMainPage, setShowMainPage] = useState(true);
   const [showError, setShowError] = useState(false);
   const [showSafe, setShowSafe] = useState(false);
   const [showBad, setShowBad] = useState(false);
+  const [showNotFound, setShowNotFound] = useState(false);
 
   function handleChange(event) {
     // this.setState({value: event.target.value});
     // alert(event.target.value);
-    setValue({value: event.target.value});
+    // setValue({value: event.target.value});
+    setAddressBar(event.target.value);
   }
 
-
-
+  function showNotFoundfn(){
+    if (showNotFound){
+      console.log('show approve fn inner', showApprove)
+      return(
+      <p>
+        Nothing was found
+      </p>)
+    } else {
+      console.log('falsseee')
+      return(
+      <div>
+      </div>);
+    }
+  }
 
   function showApprovefn(){
-    //console.log('noyesss')
+    console.log('show approve man fn')
 
     if (showApprove){
-      console.log('yesss')
+      console.log('show approve fn inner', showApprove)
       return(
       <p>
         Approved added
       </p>)
     } else {
+      console.log('falsseee')
       return(
       <div>
       </div>);
@@ -59,10 +72,10 @@ const NameForm = () => {
 
 
   function showErrorfn(){
-    //console.log('noyesss')
+    console.log('show error fn')
 
-    if (showApprove){
-      console.log('yesss')
+    if (showError){
+      console.log('show approve fn')
       return(
       <p>
         Got an error in adding
@@ -76,10 +89,10 @@ const NameForm = () => {
 
 
   function showBadfn(){
-    ///console.log('noyesss')
+    console.log('show bad fnnn')
 
     if (showBad){
-      console.log('yesss')
+      console.log('inner fn bad')
       return(
       <p>
         this address is bad
@@ -92,10 +105,10 @@ const NameForm = () => {
   };
 
   function showSafefn(){
-    //console.log('noyesss')
+    console.log('inner safe fn')
 
     if (showSafe){
-      console.log('yesss')
+      console.log('ye ssafe sshow')
       return(
       <p>
         this address is bad
@@ -109,32 +122,45 @@ const NameForm = () => {
 
 
   useEffect(() => {
-  }, [showApprove, showMainPage, showError, showBad, showSafe]);
+    console.log('updateddd')
+  }, [showApprove, showMainPage, showError, showBad, showSafe, showNotFound]);
 
 
-   //Todo handle blocklist
-   /*
-   function handleSubmit(event) {
-    event.preventDefault();
-    // This is for approve
-    chrome.runtime.sendMessage({foo: {type: 'addToSafeList', value: value.value}}, response => {
-      if (response === 'true'){
-        setShowApprove(true);
-        setShowMainPage(false);
-        console.log('yayyy')
-      } else {
-        setShowError(true);
-        setShowMainPage(false);
-        console.log('oh no')
-      }
-    })
-  }
-  */
+  useEffect(() => {
+    fetchCurrentTab();
+  }, []);
+
+
+  //  //Todo handle blocklist
+  //  function handleSubmit(event) {
+  //   event.preventDefault();
+  //   // This is for approve
+  //   chrome.runtime.sendMessage({foo: {type: 'addToSafeList', value: value.value}}, response => {
+  //     if (response === 'true'){
+  //       setShowApprove(true);
+  //       setShowMainPage(false);
+  //       console.log('yayyy')
+  //     } else {
+  //       setShowError(true);
+  //       setShowMainPage(false);
+  //       console.log('oh no')
+  //     }
+  //   })
+  // }
+
+
+     //Todo handle blocklist
+     function handleSubmit(event) {
+      //  setValue(addressBar)
+      event.preventDefault();
+      checkAddress(addressBar);
+    }
 
 
 
-  function checkAddress() {
-    chrome.runtime.sendMessage({foo: {type: 'checkAddress', value: value.value}}, response => {
+  function checkAddress(address) {
+    console.log('checkaddress', address);
+    chrome.runtime.sendMessage({foo: {type: 'checkAddress', value: address}}, response => {
       if (response === 'found good'){
         setShowSafe(true);
         setShowMainPage(false);
@@ -143,60 +169,54 @@ const NameForm = () => {
         setShowBad(true);
         setShowMainPage(false);
         console.log('oh no')
-      } else if(response === 'not found'){
-        setShowMainPage(true);
+      } else {
+        console.log('found nothing')
+        setShowMainPage(false);
+        setShowNotFound(true);
       }
     })
   }
 
-  /*
-  function getTabID(){
-    return new Promise((resolve, reject) => {
-            chrome.tabs.query({
-                active: true,lastFocusedWindow: true
-            }, function (tabs) {
-                resolve(tabs[0].url);
-            })
-
+  function fetchCurrentTab(){
+    chrome.tabs.query({active: true,lastFocusedWindow: true}, async (tabs) =>{
+      let tmpurl = await tabs[0].url;
+      let tmp= new URL(tmpurl);
+      setAddressBar(tmp.hostname);
     })
-}
-*/
+  }
 
 
-chrome.tabs.query({active: true,lastFocusedWindow: true}, async (tabs) =>{
-  let tmpurl = await tabs[0].url;
-  let tmp= new URL(tmpurl);
-  setValue({ value:tmp.hostname});
-})
+  const handleButtonEventSafe = () => {
+    console.log("sending info to background for whitelist check");
+    chrome.runtime.sendMessage({url: addressBar, listtype:"approvedlist", function:"addURL"}), response => {
+    }
+    // Do something
+    if (false) {
+      setShowApprove(true);
+      setShowMainPage(false);
+    } else {
+      setShowError(true);
+      setShowMainPage(false);
+    }
+  };
+
+  const handleButtonEventBlock = () => {
+    console.log("sending info to background for blocklist check");
+    chrome.runtime.sendMessage({url: addressBar, listtype:"blockedlist", function:"addURL"});
+    // Do something
+  };
 
 
 
   function mainpage() {
-
-    const handleMouseEventSafe = (e: MouseEvent<HTMLButtonElement>) => {
-      e.preventDefault();
-      console.log("sending info to background");
-      chrome.runtime.sendMessage({ url: value.value, listtype:"approvedlist",function:"addURL"});
-      // Do something
-    };
-
-    const handleMouseEventBlock = (e: MouseEvent<HTMLButtonElement>) => {
-      
-      e.preventDefault();
-      console.log("sending info to background");
-      chrome.runtime.sendMessage({ url: value.value, listtype:"blockedlist",function:"addURL"});
-      // Do something
-    };
-
-
     if(showMainPage){
       return (
-        <form>
+        <form onSubmit={handleSubmit}>
           <label>
             <input
               type="text"
               placeholder="Type an address and press enter..."
-              value={value.value}
+              value={addressBar}
               onChange={e => handleChange(e)}
               style={{
                 padding: "10px 20px",
@@ -211,10 +231,9 @@ chrome.tabs.query({active: true,lastFocusedWindow: true}, async (tabs) =>{
             />
           </label>
           <img className = 'logo' src = {logo}/>
-          <Button onClick={handleMouseEventSafe}> Safe List</Button>
-          <Button onClick={handleMouseEventBlock}> Block List</Button>
+          <Button onClick={handleButtonEventSafe}> Add to Safe List</Button>
+          <Button onClick={handleButtonEventBlock}> Add to Block List</Button>
         </form>
-        
       );
     
     } else {
@@ -226,9 +245,9 @@ chrome.tabs.query({active: true,lastFocusedWindow: true}, async (tabs) =>{
   
   return (
     <div className='body'>
-        {checkAddress()}
-        {showBadfn()}
-        {showSafefn()}
+        {/* {checkAddress()} */}
+        {/* {showBadfn()}
+        {showSafefn()} */}
         <div className='header'>
           <text className = 'gaspricetitle'> ETH Mid Gas Price: </text>
           <br />
@@ -240,6 +259,7 @@ chrome.tabs.query({active: true,lastFocusedWindow: true}, async (tabs) =>{
         <div id='nextPages'>
           {showApprovefn()}
           {showErrorfn()}
+          {showNotFoundfn()}
         </div>
     </div>
   );
@@ -328,4 +348,3 @@ const App: React.FC<{}> = () => {
 const root = document.createElement('div')
 document.body.appendChild(root)
 ReactDOM.render(<App />, root)
-
