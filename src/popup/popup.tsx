@@ -1,5 +1,5 @@
 
-import React, {Component, useEffect, useState} from 'react'
+import React, {Component, useEffect, useState,MouseEvent} from 'react'
 import ReactDOM from 'react-dom'
 import  './popup.css'
 import logo from "./logo.jpg";
@@ -22,6 +22,8 @@ const NameForm = () => {
   //   this.handleSubmit = this.handleSubmit.bind(this);
   // }
 
+
+
   const [value, setValue] = useState({value: ''});
   const [showApprove, setShowApprove] = useState(false);
   const [showMainPage, setShowMainPage] = useState(true);
@@ -36,8 +38,10 @@ const NameForm = () => {
   }
 
 
+
+
   function showApprovefn(){
-    console.log('noyesss')
+    //console.log('noyesss')
 
     if (showApprove){
       console.log('yesss')
@@ -55,7 +59,7 @@ const NameForm = () => {
 
 
   function showErrorfn(){
-    console.log('noyesss')
+    //console.log('noyesss')
 
     if (showApprove){
       console.log('yesss')
@@ -72,7 +76,7 @@ const NameForm = () => {
 
 
   function showBadfn(){
-    console.log('noyesss')
+    ///console.log('noyesss')
 
     if (showBad){
       console.log('yesss')
@@ -88,7 +92,7 @@ const NameForm = () => {
   };
 
   function showSafefn(){
-    console.log('noyesss')
+    //console.log('noyesss')
 
     if (showSafe){
       console.log('yesss')
@@ -109,6 +113,7 @@ const NameForm = () => {
 
 
    //Todo handle blocklist
+   /*
    function handleSubmit(event) {
     event.preventDefault();
     // This is for approve
@@ -124,6 +129,7 @@ const NameForm = () => {
       }
     })
   }
+  */
 
 
 
@@ -143,11 +149,49 @@ const NameForm = () => {
     })
   }
 
+  /*
+  function getTabID(){
+    return new Promise((resolve, reject) => {
+            chrome.tabs.query({
+                active: true,lastFocusedWindow: true
+            }, function (tabs) {
+                resolve(tabs[0].url);
+            })
+
+    })
+}
+*/
+
+
+chrome.tabs.query({active: true,lastFocusedWindow: true}, async (tabs) =>{
+  let tmpurl = await tabs[0].url;
+  let tmp= new URL(tmpurl);
+  setValue({ value:tmp.hostname});
+})
+
+
 
   function mainpage() {
+
+    const handleMouseEventSafe = (e: MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault();
+      console.log("sending info to background");
+      chrome.runtime.sendMessage({ url: value.value, listtype:"approvedlist",function:"addURL"});
+      // Do something
+    };
+
+    const handleMouseEventBlock = (e: MouseEvent<HTMLButtonElement>) => {
+      
+      e.preventDefault();
+      console.log("sending info to background");
+      chrome.runtime.sendMessage({ url: value.value, listtype:"blockedlist",function:"addURL"});
+      // Do something
+    };
+
+
     if(showMainPage){
       return (
-        <form onSubmit={handleSubmit}>
+        <form>
           <label>
             <input
               type="text"
@@ -167,8 +211,10 @@ const NameForm = () => {
             />
           </label>
           <img className = 'logo' src = {logo}/>
-          <Button variant="primary" type="submit"> Safe List</Button>
+          <Button onClick={handleMouseEventSafe}> Safe List</Button>
+          <Button onClick={handleMouseEventBlock}> Block List</Button>
         </form>
+        
       );
     
     } else {

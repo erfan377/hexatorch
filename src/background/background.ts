@@ -16,6 +16,9 @@ chrome.runtime.onInstalled.addListener(() => {
 
     const processingTabId = {};
 
+    //chrome.tabs.executeScript(null,{file:"contentScript.js"});
+
+
     function fetchLocal(listype){
       if (listype=="approvedlist"){
         chrome.storage.local.get(["approvedlist"], (res) => {
@@ -89,6 +92,8 @@ chrome.runtime.onInstalled.addListener(() => {
       
     }
 
+    /*
+
     chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       if (msg.foo.type === 'addToSafeList') {
         console.log('first', msg.foo.value)
@@ -104,11 +109,12 @@ chrome.runtime.onInstalled.addListener(() => {
         sendResponse('fnot found');
       }
     });
+    */
 
 
 
 
-
+    /*
 
     chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       if (msg.foo.type === 'addToSafeList') {
@@ -121,11 +127,11 @@ chrome.runtime.onInstalled.addListener(() => {
         sendResponse('true');
       }
     });
-
+    */
 
     //TODO: make this intro a if statement for response
     function addURL(newURL,listtype) {
-      console.log('adding URL');
+      console.log('adding URL with list type '+listtype);
       if (listtype=="approvedlist"){
         if (localApprovedlist.includes(newURL)){
           console.log("URL already exists in approvedlist");
@@ -133,6 +139,7 @@ chrome.runtime.onInstalled.addListener(() => {
         }
         else{
           localApprovedlist.push(newURL);
+          console.log("successfully added "+newURL+" to the approvedlist");
           chrome.storage.local.set({"approvedlist":localApprovedlist});
         }
       }
@@ -197,7 +204,14 @@ chrome.runtime.onInstalled.addListener(() => {
       return results;
 
     }
-    
+
+    chrome.runtime.onMessage.addListener(
+      function(request, sender, sendResponse){
+          if(request.function == "addURL") {
+            addURL(request.url,request.listtype);
+          }
+      }
+    );
 
     function run(tabId) {
       if (processingTabId[tabId]) return;
@@ -209,8 +223,19 @@ chrome.runtime.onInstalled.addListener(() => {
 
       console.log("URL changed: ", currentHost);
 
-      //let result = checkURL(currentHost);
+      let results = checkURL(currentHost);
+      
+      if (results["inUserApprovedlist"] || results["inServerBlockedlist"]){
+        console.log("it's in the approved list");
+        chrome.tabs.sendMessage(tabId,{msg:"approved"});
+        console.log("it's in the approved list");
+      }
 
+      else if (results["inUserBlockedlist"] || results["inServerBlockedlist"]){
+        console.log("it's in the blocked list");
+        chrome.tabs.sendMessage(tabId,{msg:"blocked"});
+      }
+      
       delete processingTabId[tabId];
     }
 
