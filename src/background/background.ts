@@ -94,6 +94,8 @@ chrome.runtime.onInstalled.addListener(() => {
 
 
 
+
+
     chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
       if (msg.command.type === 'addToSafeList') {
@@ -110,8 +112,9 @@ chrome.runtime.onInstalled.addListener(() => {
       } else if (msg.command.type === "checkAddress") {
         console.log('bg just checking address her', msg.command.value)
         //TODO check URL and return 'found good' or 'found bad' or 'not found'
-        let result = run(msg.command.value);
-        console.log('resulttt check', result);
+        run(msg.command.value).then((result) => sendResponse(result));
+        let result = run(msg.command.value)
+        console.log('bg: res run ', result)
         sendResponse(result);
       } else if (msg.command.type === "getAddress") { 
         console.log('bg: url', currentUrl)
@@ -196,7 +199,7 @@ chrome.runtime.onInstalled.addListener(() => {
 
     });
 
-    function checkURL(currelhost){
+    async function checkURL(currelhost){
       console.log('approve list before', localApprovedlist)
       console.log('blocked list before', localBlockedlist)
 
@@ -238,11 +241,11 @@ chrome.runtime.onInstalled.addListener(() => {
       processingTabId[tabId] = true;
       console.log(tabId);
       //let newUrl = new URL(tabIdToURL[tabId]);
-      currentHost = tabIdToURL[tabId];
+      currentHost = await tabIdToURL[tabId];
       
       console.log("URL changed: ", currentHost);
       
-      let results = checkURL(currentHost);
+      let results = await checkURL(currentHost);
       console.log('run', results);
       
       if (results["inUserApprovedlist"] || results["inServerBlockedlist"]){

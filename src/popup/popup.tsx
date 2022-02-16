@@ -13,14 +13,6 @@ import Button from 'react-bootstrap/Button';
 
 const NameForm = () => {
 
-  // constructor(props) {
-  //   super(props);
-  //   this.state = {value: ''};
-
-  //   this.handleChange = this.handleChange.bind(this);
-  //   this.handleSubmit = this.handleSubmit.bind(this);
-  // }
-
   const [value, setValue] = useState('');
   const [addressBar, setAddressBar] = useState('');
   const [showApprove, setShowApprove] = useState(false);
@@ -32,9 +24,6 @@ const NameForm = () => {
   const [submission, setSubmission] = useState(false);
 
   function handleChange(event) {
-    // this.setState({value: event.target.value});
-    // alert(event.target.value);
-    // setValue({value: event.target.value});
     event.preventDefault();
     setAddressBar(event.target.value);
   }
@@ -132,24 +121,6 @@ const NameForm = () => {
   }, []);
 
 
-  //  //Todo handle blocklist
-  //  function handleSubmit(event) {
-  //   event.preventDefault();
-  //   // This is for approve
-  //   chrome.runtime.sendMessage({foo: {type: 'addToSafeList', value: value.value}}, response => {
-  //     if (response === 'true'){
-  //       setShowApprove(true);
-  //       setShowMainPage(false);
-  //       console.log('yayyy')
-  //     } else {
-  //       setShowError(true);
-  //       setShowMainPage(false);
-  //       console.log('oh no')
-  //     }
-  //   })
-  // }
-
-
      //Todo handle blocklist
      function handleSubmit(event) {
       //  setValue(addressBar)
@@ -160,25 +131,14 @@ const NameForm = () => {
 
 
 
-  function checkAddress(address) {
+  async function checkAddress(address) {
     console.log('pop: checkaddress', address);
-    // chrome.runtime.sendMessage({foo: {type: 'addToSafeList', value: address}}, response => {
-    //   if (response === 'found good'){
-    //     setShowSafe(true);
-    //     setShowMainPage(false);
-    //     console.log('yayyy')
-    //   } else if(response === 'found bad'){
-    //     setShowBad(true);
-    //     setShowMainPage(false);
-    //     console.log('oh no')
-    //   } else {
-    //     console.log('found nothing')
-    //     setShowMainPage(false);
-    //     setShowNotFound(true);
-    //   }
-    // })
 
-    chrome.runtime.sendMessage({command: {type: 'checkAddress', value: address}}, response => {
+    chrome.runtime.sendMessage({command: {type: 'checkAddress', value: address}}, async response => {
+
+      console.log('pop: inside chrome check ad', response)
+      let result = await response;
+      console.log('pop: result of response,', response)
       if (response === 'safe'){
         setShowSafe(true);
         setShowMainPage(false);
@@ -227,18 +187,6 @@ const NameForm = () => {
 
   const handleButtonEventSafe = () => {
     console.log("sending info to background for whitelist check");
-    // chrome.runtime.sendMessage({foo: {type: 'checkAddress', value: addressBar}}, response => {
-    //   // Do something
-    //   console.log('inside fn')
-    //   if (response) {
-    //     console.log('trueeee')
-    //     setShowApprove(true);
-    //     setShowMainPage(false);
-    //   } else {
-    //     setShowError(true);
-    //     setShowMainPage(false);
-    //   }
-    // })
 
     chrome.runtime.sendMessage({command: {type: 'addToSafeList', value: addressBar}}, response => {
       console.log('response safe', response)
@@ -328,79 +276,6 @@ const NameForm = () => {
   );
 
 }
-
-// class NameForm extends React.Component<{}, { value: string }> {
-
-//   constructor(props) {
-//     super(props);
-//     this.state = {value: ''};
-
-//     this.handleChange = this.handleChange.bind(this);
-//     this.handleSubmit = this.handleSubmit.bind(this);
-//   }
-
-//   handleChange(event) {
-//     this.setState({value: event.target.value});
-//   }
-
-
-//   //Todo handle blocklist
-//   handleSubmit(event) {
-
-//     // This is for approve
-//     chrome.runtime.sendMessage({foo: {type: 'addToSafeList', value: this.state.value}}, response => {
-//       if (response === 'true'){
-//         // TODO: Show new page
-//         console.log('yayyy')
-//       } else {
-//         // TODO:Show it existed
-//         console.log('oh no')
-//       }
-//     });
-//     event.preventDefault();
-//   }
-
-//   render() {
-//     return (
-//       <div className='body'>
-//         <div className='header'>
-//           <text className = 'gaspricetitle'> ETH Mid Gas Price: </text>
-//           <br />
-//           <text className = 'gasprice'>  73 Gwei, $3.84 USD </text>
-//         </div>
-//         <div id='main page'>
-//           <form onSubmit={this.handleSubmit}>
-//             <label>
-//               <input
-//                 type="text"
-//                 placeholder="Type an address and press enter..."
-//                 value={this.state.value}
-//                 onChange={this.handleChange}
-//                 style={{
-//                   padding: "10px 20px",
-//                   width: "300px",
-//                   textAlign: "left",
-//                   // align: "center",
-//                   border: "0px",
-//                   marginLeft: "25px",
-//                   backgroundColor: '#EDE7E7',
-//                   borderRadius: '10px',
-//                 }}
-//               />
-//             </label>
-//             <img className = 'logo' src = {logo}/>
-//             <Button variant="primary" type="submit"> Safe List</Button>
-//           </form>
-//         </div>
-//     </div>
-//     );
-//   }
-// }
-
-// function sendForm(){
-//   //check for validity of link
-// }
-
 
 const App: React.FC<{}> = () => {
   return (
