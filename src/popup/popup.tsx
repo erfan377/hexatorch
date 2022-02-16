@@ -29,23 +29,23 @@ const NameForm = () => {
   const [showSafe, setShowSafe] = useState(false);
   const [showBad, setShowBad] = useState(false);
   const [showNotFound, setShowNotFound] = useState(false);
+  const [submission, setSubmission] = useState(false);
 
   function handleChange(event) {
     // this.setState({value: event.target.value});
     // alert(event.target.value);
     // setValue({value: event.target.value});
+    event.preventDefault();
     setAddressBar(event.target.value);
   }
 
   function showNotFoundfn(){
     if (showNotFound){
-      console.log('show approve fn inner', showApprove)
       return(
       <p>
         Nothing was found
       </p>)
     } else {
-      console.log('falsseee')
       return(
       <div>
       </div>);
@@ -53,16 +53,12 @@ const NameForm = () => {
   }
 
   function showApprovefn(){
-    console.log('show approve man fn')
-
     if (showApprove){
-      console.log('show approve fn inner', showApprove)
       return(
       <p>
         Approved added
       </p>)
     } else {
-      console.log('falsseee')
       return(
       <div>
       </div>);
@@ -72,10 +68,8 @@ const NameForm = () => {
 
 
   function showErrorfn(){
-    console.log('show error fn')
 
     if (showError){
-      console.log('show approve fn')
       return(
       <p>
         Got an error in adding
@@ -89,10 +83,8 @@ const NameForm = () => {
 
 
   function showBadfn(){
-    console.log('show bad fnnn')
 
     if (showBad){
-      console.log('inner fn bad')
       return(
       <p>
         this address is bad
@@ -105,10 +97,8 @@ const NameForm = () => {
   };
 
   function showSafefn(){
-    console.log('inner safe fn')
 
     if (showSafe){
-      console.log('ye ssafe sshow')
       return(
       <p>
         this address is bad
@@ -122,12 +112,23 @@ const NameForm = () => {
 
 
   useEffect(() => {
-    console.log('updateddd')
-  }, [showApprove, showMainPage, showError, showBad, showSafe, showNotFound]);
+  }, [showApprove, showMainPage, showError, showBad, showSafe, showNotFound, addressBar]);
 
 
   useEffect(() => {
-    fetchCurrentTab();
+    console.log('run on opening tabs');
+    // fetchCurrentTab().then((url) => console.log('addressssssss', url));
+    // console.log('addressssssss', url);
+    setSubmission(false);
+    chrome.tabs.query({active: true,lastFocusedWindow: true}, (tabs) =>{
+      let tmpurl = tabs[0].url;
+      let tmp = new URL(tmpurl);
+      console.log('fetchh url', tmp.hostname)
+      setAddressBar(tmp.hostname);
+      checkAddress(tmp.hostname);
+      return tmp.hostname;
+    })
+    console.log('should come after');
   }, []);
 
 
@@ -152,6 +153,7 @@ const NameForm = () => {
      //Todo handle blocklist
      function handleSubmit(event) {
       //  setValue(addressBar)
+      setSubmission(true);
       event.preventDefault();
       checkAddress(addressBar);
     }
@@ -159,51 +161,113 @@ const NameForm = () => {
 
 
   function checkAddress(address) {
-    console.log('checkaddress', address);
-    chrome.runtime.sendMessage({foo: {type: 'checkAddress', value: address}}, response => {
-      if (response === 'found good'){
+    console.log('pop: checkaddress', address);
+    // chrome.runtime.sendMessage({foo: {type: 'addToSafeList', value: address}}, response => {
+    //   if (response === 'found good'){
+    //     setShowSafe(true);
+    //     setShowMainPage(false);
+    //     console.log('yayyy')
+    //   } else if(response === 'found bad'){
+    //     setShowBad(true);
+    //     setShowMainPage(false);
+    //     console.log('oh no')
+    //   } else {
+    //     console.log('found nothing')
+    //     setShowMainPage(false);
+    //     setShowNotFound(true);
+    //   }
+    // })
+
+    chrome.runtime.sendMessage({command: {type: 'checkAddress', value: address}}, response => {
+      if (response === 'safe'){
         setShowSafe(true);
         setShowMainPage(false);
-        console.log('yayyy')
-      } else if(response === 'found bad'){
+        console.log('pop: checking address safe')
+      } else if(response === 'blocked'){
         setShowBad(true);
         setShowMainPage(false);
-        console.log('oh no')
-      } else {
-        console.log('found nothing')
+        console.log('pop: checking address blocked')
+
+      } else if(submission){
+        console.log('pop: checking address not found')
         setShowMainPage(false);
         setShowNotFound(true);
+      } else {
+        console.log('pop: just show main page')
+        setShowMainPage(true);
       }
     })
-  }
+  };
 
-  function fetchCurrentTab(){
-    chrome.tabs.query({active: true,lastFocusedWindow: true}, async (tabs) =>{
-      let tmpurl = await tabs[0].url;
-      let tmp= new URL(tmpurl);
-      setAddressBar(tmp.hostname);
-    })
-  }
+
+  // async function fetchCurrentTab(){
+
+  //   chrome.runtime.sendMessage({command: {type: 'getAddress', value: ''}}, response => {
+
+  //     console.log('address receiv', response);
+  //     console.log('response safe', response)
+  //     if (response === 'existsSafe' || response === 'existsBlocked'){
+  //       setShowError(true);
+  //       setShowMainPage(false);
+  //       console.log('pop: address exists')
+  //     } else if(response === 'addedSafe' || response === 'addedBlocked'){
+  //       setShowApprove(true);
+  //       setShowMainPage(false);
+  //       console.log('pop: address added to safe')
+  //     }
+  //   })
+
+
+    
+  // }
+
+
+
 
 
   const handleButtonEventSafe = () => {
     console.log("sending info to background for whitelist check");
-    chrome.runtime.sendMessage({url: addressBar, listtype:"approvedlist", function:"addURL"}), response => {
-    }
-    // Do something
-    if (false) {
-      setShowApprove(true);
-      setShowMainPage(false);
-    } else {
-      setShowError(true);
-      setShowMainPage(false);
-    }
+    // chrome.runtime.sendMessage({foo: {type: 'checkAddress', value: addressBar}}, response => {
+    //   // Do something
+    //   console.log('inside fn')
+    //   if (response) {
+    //     console.log('trueeee')
+    //     setShowApprove(true);
+    //     setShowMainPage(false);
+    //   } else {
+    //     setShowError(true);
+    //     setShowMainPage(false);
+    //   }
+    // })
+
+    chrome.runtime.sendMessage({command: {type: 'addToSafeList', value: addressBar}}, response => {
+      console.log('response safe', response)
+      if (response === 'existsSafe' || response === 'existsBlocked'){
+        setShowError(true);
+        setShowMainPage(false);
+        console.log('pop: address exists')
+      } else if(response === 'addedSafe' || response === 'addedBlocked'){
+        setShowApprove(true);
+        setShowMainPage(false);
+        console.log('pop: address added to safe')
+      }
+    })
   };
 
   const handleButtonEventBlock = () => {
     console.log("sending info to background for blocklist check");
-    chrome.runtime.sendMessage({url: addressBar, listtype:"blockedlist", function:"addURL"});
-    // Do something
+    chrome.runtime.sendMessage({command: {type: 'addToBLockedList', value: addressBar}}, response => {
+      console.log('response block', response)
+      if (response === 'existsSafe' || response === 'existsBlocked'){
+        setShowError(true);
+        setShowMainPage(false);
+        console.log('pop: address exists blocked')
+      } else if(response === 'addedSafe' || response === 'addedBLocked'){
+        setShowApprove(true);
+        setShowMainPage(false);
+        console.log('pop: address added to blocked')
+      }
+    })
   };
 
 
@@ -245,9 +309,6 @@ const NameForm = () => {
   
   return (
     <div className='body'>
-        {/* {checkAddress()} */}
-        {/* {showBadfn()}
-        {showSafefn()} */}
         <div className='header'>
           <text className = 'gaspricetitle'> ETH Mid Gas Price: </text>
           <br />
@@ -260,6 +321,8 @@ const NameForm = () => {
           {showApprovefn()}
           {showErrorfn()}
           {showNotFoundfn()}
+          {showBadfn()}
+          {showSafefn()}
         </div>
     </div>
   );

@@ -92,24 +92,35 @@ chrome.runtime.onInstalled.addListener(() => {
       
     }
 
-    /*
+
 
     chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-      if (msg.foo.type === 'addToSafeList') {
-        console.log('first', msg.foo.value)
 
+      if (msg.command.type === 'addToSafeList') {
+        console.log('bg adding to safe', msg.command.value)
         // TODO: do appropriate checks
-        addURL(msg.foo.value, "approvedlist");
+        let result = addURL(msg.command.value, "approvedlist");
 
-        //TODO: if addURL === true then sendResponse('true') else sendResponse('false')
-        sendResponse('true');
-      }
-      if (msg.foo.type === 'checkAddress') {
+        sendResponse(result);
+      } else if (msg.command.type === 'addToBLockedList') {
+        console.log('bg adding to blocked', msg.command.value)
+        let result = addURL(msg.command.value, "blockedlist");
+        sendResponse(result);
+
+      } else if (msg.command.type === "checkAddress") {
+        console.log('bg just checking address her', msg.command.value)
         //TODO check URL and return 'found good' or 'found bad' or 'not found'
-        sendResponse('fnot found');
+        let result = run(msg.command.value);
+        console.log('resulttt check', result);
+        sendResponse(result);
+      } else if (msg.command.type === "getAddress") { 
+        console.log('bg: url', currentUrl)
+
+
+        sendResponse(currentUrl);
       }
     });
-    */
+
 
 
 
@@ -135,21 +146,25 @@ chrome.runtime.onInstalled.addListener(() => {
       if (listtype=="approvedlist"){
         if (localApprovedlist.includes(newURL)){
           console.log("URL already exists in approvedlist");
-
+          return 'existsSafe';
         }
         else{
           localApprovedlist.push(newURL);
           console.log("successfully added "+newURL+" to the approvedlist");
           chrome.storage.local.set({"approvedlist":localApprovedlist});
+          return 'addedSafe';
         }
       }
       else if (listtype=="blockedlist"){
         if (localBlockedlist.includes(newURL)){
           console.log("URL already exists in blockedlist");
+          return 'existsBlocked';
         }
         else{
           localBlockedlist.push(newURL);
+          console.log("successfully added "+newURL+" to the blockedList");
           chrome.storage.local.set({"blockedlist":localBlockedlist});
+          return 'addedBLocked';
         }
       }
     }
@@ -161,9 +176,10 @@ chrome.runtime.onInstalled.addListener(() => {
     });
 
     chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab){
-      console.log(tab.url);
+      console.log('updating ', tab.url);
       var tmpURL= new URL(tab.url);
       tabIdToURL[tabId] = tmpURL.hostname;
+      currentUrl = tab.url;
       if (changeInfo.url) {
         run(tabId);
       }
@@ -171,7 +187,9 @@ chrome.runtime.onInstalled.addListener(() => {
     
     chrome.tabs.onActivated.addListener(function(info){
       chrome.tabs.get(info.tabId, function(tab){
+        console.log('gett ', info.tabId);
         var tmpURL= new URL(tab.url);
+        currentUrl = tab.url;
         tabIdToURL[info.tabId] = tmpURL.hostname;
         run(info.tabId);
     });
@@ -179,6 +197,8 @@ chrome.runtime.onInstalled.addListener(() => {
     });
 
     function checkURL(currelhost){
+      console.log('approve list before', localApprovedlist)
+      console.log('blocked list before', localBlockedlist)
 
       var results = {"inUserApprovedlist":false,
                     "inUserBlockedlist":false,
@@ -192,7 +212,6 @@ chrome.runtime.onInstalled.addListener(() => {
       if (localBlockedlist.includes(currelhost)){
         results["inUserBlockedlist"] = true;
       }
-
       if (serverLookup("malicious_links", currelhost)){
         results["inServerBlockedlist"] = true;
       }
@@ -205,35 +224,42 @@ chrome.runtime.onInstalled.addListener(() => {
 
     }
 
-    chrome.runtime.onMessage.addListener(
-      function(request, sender, sendResponse){
-          if(request.function == "addURL") {
-            addURL(request.url,request.listtype);
-          }
-      }
-    );
+    // chrome.runtime.onMessage.addListener(
+    //   function(request, sender, sendResponse){
+    //       if(request.function == "addURL") {
+    //         sendResponse(true)
+    //         addURL(request.url,request.listtype);
+    //       }
+    //   }
+    // );
 
-    function run(tabId) {
+    async function run(tabId) {
       if (processingTabId[tabId]) return;
       processingTabId[tabId] = true;
       console.log(tabId);
       //let newUrl = new URL(tabIdToURL[tabId]);
       currentHost = tabIdToURL[tabId];
-      //currentUrl = tab.url;
-
+      
       console.log("URL changed: ", currentHost);
-
+      
       let results = checkURL(currentHost);
+      console.log('run', results);
       
       if (results["inUserApprovedlist"] || results["inServerBlockedlist"]){
         console.log("it's in the approved list");
         chrome.tabs.sendMessage(tabId,{msg:"approved"});
         console.log("it's in the approved list");
+        return 'safe';
       }
 
       else if (results["inUserBlockedlist"] || results["inServerBlockedlist"]){
         console.log("it's in the blocked list");
         chrome.tabs.sendMessage(tabId,{msg:"blocked"});
+        return 'blocked';
+
+      } else {
+        console.log("bg: didn't find it");
+        return 'not found';
       }
       
       delete processingTabId[tabId];
@@ -251,17 +277,23 @@ chrome.runtime.onInstalled.addListener(() => {
     };
     
     const app = initializeApp(firebaseConfig);
-    const db = getFirestore();    
+    const db = getFirestore();
 
-    async function serverLookup(collection_name, url) {
-      // Initialize Firebase
-      const approvedRef = collection(db, collection_name);
-      const nameQuery = query(approvedRef, where("URL", "==", url));
-      const querySnapshot = await getDocs(nameQuery);
+    async function query(){
+      // const approvedRef = collection(db, collection_name);
+      // const nameQuery = query(approvedRef, where("URL", "==", url));
+      // const querySnapshot = await getDocs(nameQuery);
+    }
+    
+      function serverLookup(collection_name, url) {
+      // // Initialize Firebase
+      // const approvedRef = collection(db, collection_name);
+      // const nameQuery = query(approvedRef, where("URL", "==", url));
+      // const querySnapshot = await getDocs(nameQuery);
 
-      querySnapshot.forEach((doc) => {
-        return true;
-      });
+      // querySnapshot.forEach((doc) => {
+      //   return true;
+      // });
       return false;
     }
     

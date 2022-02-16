@@ -2,6 +2,7 @@
   "name": "React Extension",
   "description": "Chrome Extension in React!",
   "version": "1.0.0",
+  "manifest_version": 3,
   "icons": {
     "16": "icon.png",
     "48": "icon.png",
@@ -14,7 +15,7 @@
   },
   "permissions": ["storage",
                   "activeTab",
-                  "tabs","webNavigation","<all_urls>"],
+                  "tabs"],
   "options_page": "options.html",
   "background": {
     "service_worker": "background.js"
@@ -22,17 +23,14 @@
   "content_scripts": [
     {
       "matches": [
-        "http://*/*",
-        "https://*/*"
+        "http://*/",
+        "https://*/"
       ],
       "js": [
         "contentScript.js"
-      ],
-      "run_at": "document_end" 
+      ]
     }
-    
-  ],
-  "manifest_version": 3
+  ]
 }
 
 
