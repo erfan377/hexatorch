@@ -1,6 +1,6 @@
-import React, {Component, useEffect, useState} from 'react'
+import React, { Component, useEffect, useState } from 'react'
 import ReactDOM from 'react-dom'
-import  './popup.css'
+import './popup.css'
 import logo from "./logo.jpg";
 import Button from 'react-bootstrap/Button';
 
@@ -28,74 +28,74 @@ const NameForm = () => {
     setAddressBar(event.target.value);
   }
 
-  function showNotFoundfn(){
-    if (showNotFound){
-      return(
-      <p>
-        Nothing was found
-      </p>)
+  function showNotFoundfn() {
+    if (showNotFound) {
+      return (
+        <p>
+          Nothing was found
+        </p>)
     } else {
-      return(
-      <div>
-      </div>);
+      return (
+        <div>
+        </div>);
     }
   }
 
-  function showApprovefn(){
-    if (showApprove){
-      return(
-      <p>
-        Approved added
-      </p>)
+  function showApprovefn() {
+    if (showApprove) {
+      return (
+        <p>
+          Approved added
+        </p>)
     } else {
-      return(
-      <div>
-      </div>);
+      return (
+        <div>
+        </div>);
     }
   };
 
 
 
-  function showErrorfn(){
+  function showErrorfn() {
 
-    if (showError){
-      return(
-      <p>
-        Got an error in adding
-      </p>)
+    if (showError) {
+      return (
+        <p>
+          Got an error in adding
+        </p>)
     } else {
-      return(
-      <div>
-      </div>);
+      return (
+        <div>
+        </div>);
     }
   };
 
 
-  function showBadfn(){
+  function showBadfn() {
 
-    if (showBad){
-      return(
-      <p>
-        this address is bad
-      </p>)
+    if (showBad) {
+      return (
+        <p>
+          this address is bad
+        </p>)
     } else {
-      return(
-      <div>
-      </div>);
+      return (
+        <div>
+        </div>);
     }
   };
 
-  function showSafefn(){
+  function showSafefn() {
 
-    if (showSafe){
-      return(
-      <p>
-        this address is bad
-      </p>)
+    if (showSafe) {
+      return (
+        <p>
+          this address is bad
+        </p>)
     } else {
-      return(
-      <div>
-      </div>);
+      return (
+        <div>
+        </div>);
     }
   };
 
@@ -109,7 +109,7 @@ const NameForm = () => {
     // fetchCurrentTab().then((url) => console.log('addressssssss', url));
     // console.log('addressssssss', url);
     setSubmission(false);
-    chrome.tabs.query({active: true,lastFocusedWindow: true}, (tabs) =>{
+    chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
       let tmpurl = tabs[0].url;
       let tmp = new URL(tmpurl);
       console.log('fetchh url', tmp.hostname)
@@ -121,34 +121,35 @@ const NameForm = () => {
   }, []);
 
 
-     //Todo handle blocklist
-     function handleSubmit(event) {
-      //  setValue(addressBar)
-      setSubmission(true);
-      event.preventDefault();
-      checkAddress(addressBar);
-    }
+  //Todo handle blocklist
+  function handleSubmit(event) {
+    //  setValue(addressBar)
+    setSubmission(true);
+    event.preventDefault();
+    checkAddress(addressBar);
+  }
 
 
 
   async function checkAddress(address) {
     console.log('pop: checkaddress', address);
 
-    chrome.runtime.sendMessage({command: {type: 'checkAddress', value: address}}, async response => {
+    chrome.runtime.sendMessage({ command: { type: 'checkAddress', value: address } }, async response => {
 
       console.log('pop: inside chrome check ad', response)
       let result = await response;
-      console.log('pop: result of response,', response)
-      if (response === 'safe'){
+      response.then(console.log('pop: result of response,', response))
+      // console.log('pop: result of response,', response)
+      if (response === 'safe') {
         setShowSafe(true);
         setShowMainPage(false);
         console.log('pop: checking address safe')
-      } else if(response === 'blocked'){
+      } else if (response === 'blocked') {
         setShowBad(true);
         setShowMainPage(false);
         console.log('pop: checking address blocked')
 
-      } else if(submission){
+      } else if (submission) {
         console.log('pop: checking address not found')
         setShowMainPage(false);
         setShowNotFound(true);
@@ -178,7 +179,7 @@ const NameForm = () => {
   //   })
 
 
-    
+
   // }
 
 
@@ -188,13 +189,13 @@ const NameForm = () => {
   const handleButtonEventSafe = () => {
     console.log("sending info to background for whitelist check");
 
-    chrome.runtime.sendMessage({command: {type: 'addToSafeList', value: addressBar}}, response => {
+    chrome.runtime.sendMessage({ command: { type: 'addToSafeList', value: addressBar } }, response => {
       console.log('response safe', response)
-      if (response === 'existsSafe' || response === 'existsBlocked'){
+      if (response === 'existsSafe' || response === 'existsBlocked') {
         setShowError(true);
         setShowMainPage(false);
         console.log('pop: address exists')
-      } else if(response === 'addedSafe' || response === 'addedBlocked'){
+      } else if (response === 'addedSafe' || response === 'addedBlocked') {
         setShowApprove(true);
         setShowMainPage(false);
         console.log('pop: address added to safe')
@@ -204,13 +205,13 @@ const NameForm = () => {
 
   const handleButtonEventBlock = () => {
     console.log("sending info to background for blocklist check");
-    chrome.runtime.sendMessage({command: {type: 'addToBLockedList', value: addressBar}}, response => {
+    chrome.runtime.sendMessage({ command: { type: 'addToBLockedList', value: addressBar } }, response => {
       console.log('response block', response)
-      if (response === 'existsSafe' || response === 'existsBlocked'){
+      if (response === 'existsSafe' || response === 'existsBlocked') {
         setShowError(true);
         setShowMainPage(false);
         console.log('pop: address exists blocked')
-      } else if(response === 'addedSafe' || response === 'addedBLocked'){
+      } else if (response === 'addedSafe' || response === 'addedBLocked') {
         setShowApprove(true);
         setShowMainPage(false);
         console.log('pop: address added to blocked')
@@ -221,7 +222,7 @@ const NameForm = () => {
 
 
   function mainpage() {
-    if(showMainPage){
+    if (showMainPage) {
       return (
         <form onSubmit={handleSubmit}>
           <label>
@@ -242,36 +243,36 @@ const NameForm = () => {
               }}
             />
           </label>
-          <img className = 'logo' src = {logo}/>
+          <img className='logo' src={logo} />
           <Button onClick={handleButtonEventSafe}> Add to Safe List</Button>
           <Button onClick={handleButtonEventBlock}> Add to Block List</Button>
         </form>
       );
-    
+
     } else {
-      return(
-      <div>
-      </div>);
+      return (
+        <div>
+        </div>);
     }
   }
-  
+
   return (
     <div className='body'>
-        <div className='header'>
-          <text className = 'gaspricetitle'> ETH Mid Gas Price: </text>
-          <br />
-          <text className = 'gasprice'>  73 Gwei, $3.84 USD </text>
-        </div>
-        <div className='mainPage'>
-          {mainpage()}
-        </div>
-        <div id='nextPages'>
-          {showApprovefn()}
-          {showErrorfn()}
-          {showNotFoundfn()}
-          {showBadfn()}
-          {showSafefn()}
-        </div>
+      <div className='header'>
+        <text className='gaspricetitle'> ETH Mid Gas Price: </text>
+        <br />
+        <text className='gasprice'>  73 Gwei, $3.84 USD </text>
+      </div>
+      <div className='mainPage'>
+        {mainpage()}
+      </div>
+      <div id='nextPages'>
+        {showApprovefn()}
+        {showErrorfn()}
+        {showNotFoundfn()}
+        {showBadfn()}
+        {showSafefn()}
+      </div>
     </div>
   );
 
@@ -279,7 +280,7 @@ const NameForm = () => {
 
 const App: React.FC<{}> = () => {
   return (
-      <NameForm/>
+    <NameForm />
   )
 }
 
