@@ -4,8 +4,8 @@ import { doc, getFirestore, getDoc, collection, setDoc, query, where, getDocs } 
 
 chrome.runtime.onInstalled.addListener(() => {
   // TODO: on installed function
-
-  var tabIdToURL = {};
+  console.log("am ii getting itn?");
+  var tabIdToURL: Map<number, string> = new Map();
   var currentTabId = -1;
 
   var localApprovedlist = [];
@@ -93,28 +93,27 @@ chrome.runtime.onInstalled.addListener(() => {
 
   chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
+    console.log('sender status', sender);
     if (msg.command.type === 'addToSafeList') {
       console.log('bg adding to safe', msg.command.value)
       // TODO: do appropriate checks
       let result = addURL(msg.command.value, "approvedlist");
-
       sendResponse(result);
-    } else if (msg.command.type === 'addToBLockedList') {
+    } else if (msg.command.type === 'addToBlockedList') {
       console.log('bg adding to blocked', msg.command.value)
       let result = addURL(msg.command.value, "blockedlist");
       sendResponse(result);
-
     } else if (msg.command.type === "checkAddress") {
       console.log('bg just checking address her', msg.command.value)
       //TODO check URL and return 'found good' or 'found bad' or 'not found'
-      run(msg.command.value).then((result) => sendResponse(result));
-      let result = run(msg.command.value)
+      // const tabId = [...tabIdToURL.keys()].find((k) => tabIdToURL[k] === msg.command.value)
+      const result = run(msg.command.value)
       console.log('bg: res run ', result)
-      sendResponse(result);
+      sendResponse(result)
+      // let result = run(msg.command.value)
+      // sendResponse(result);
     } else if (msg.command.type === "getAddress") {
       console.log('bg: url', currentUrl)
-
-
       sendResponse(currentUrl);
     }
   });
@@ -168,18 +167,18 @@ chrome.runtime.onInstalled.addListener(() => {
   }
 
   chrome.tabs.onRemoved.addListener(function (tabId) {
-    var removed = tabIdToURL[tabId];
-    delete tabIdToURL[tabId];
+    var removed = tabIdToURL.get(tabId);
+    tabIdToURL.delete(tabId);
     console.log("tabs removed ", removed);
   });
 
   chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
     console.log('updating ', tab.url);
     var tmpURL = new URL(tab.url);
-    tabIdToURL[tabId] = tmpURL.hostname;
+    tabIdToURL.set(tabId, tmpURL.hostname);
     currentUrl = tab.url;
     if (changeInfo.url) {
-      run(tabId);
+      run(currentUrl);
     }
   });
 
@@ -188,13 +187,13 @@ chrome.runtime.onInstalled.addListener(() => {
       console.log('gett ', info.tabId);
       var tmpURL = new URL(tab.url);
       currentUrl = tab.url;
-      tabIdToURL[info.tabId] = tmpURL.hostname;
-      run(info.tabId);
+      tabIdToURL.set(info.tabId, tmpURL.hostname);
+      run(currentUrl);
     });
 
   });
 
-  async function checkURL(currelhost) {
+  function checkURL(currelhost) {
     console.log('approve list before', localApprovedlist)
     console.log('blocked list before', localBlockedlist)
 
@@ -233,28 +232,29 @@ chrome.runtime.onInstalled.addListener(() => {
   //   }
   // );
 
-  async function run(tabId) {
-    if (processingTabId[tabId]) return;
-    processingTabId[tabId] = true;
-    console.log(tabId);
+  function run(currentHost: string) {
+    // console.log("pls", processingTabId[tabId])
+    // if (processingTabId[tabId]) return 'tab id present';
+    // processingTabId[tabId] = true;
+    // console.log('tabId', tabId);
     //let newUrl = new URL(tabIdToURL[tabId]);
-    currentHost = await tabIdToURL[tabId];
+    // currentHost = tabIdToURL.get(tabId);
 
     console.log("URL changed: ", currentHost);
 
-    let results = await checkURL(currentHost);
+    let results = checkURL(currentHost);
     console.log('run', results);
 
     if (results["inUserApprovedlist"] || results["inServerBlockedlist"]) {
       console.log("it's in the approved list");
-      chrome.tabs.sendMessage(tabId, { msg: "approved" });
+      // chrome.tabs.sendMessage(tabId, { msg: "approved" });
       console.log("it's in the approved list");
       return 'safe';
     }
 
     else if (results["inUserBlockedlist"] || results["inServerBlockedlist"]) {
       console.log("it's in the blocked list");
-      chrome.tabs.sendMessage(tabId, { msg: "blocked" });
+      // chrome.tabs.sendMessage(tabId, { msg: "blocked" });
       return 'blocked';
 
     } else {
@@ -262,7 +262,7 @@ chrome.runtime.onInstalled.addListener(() => {
       return 'not found';
     }
 
-    delete processingTabId[tabId];
+    // delete processingTabId[tabId];
   }
 
 
@@ -279,17 +279,17 @@ chrome.runtime.onInstalled.addListener(() => {
   const app = initializeApp(firebaseConfig);
   const db = getFirestore();
 
-  async function query() {
+  function query() {
     // const approvedRef = collection(db, collection_name);
     // const nameQuery = query(approvedRef, where("URL", "==", url));
-    // const querySnapshot = await getDocs(nameQuery);
+    // const querySnapshot = getDocs(nameQuery);
   }
 
   function serverLookup(collection_name, url) {
     // // Initialize Firebase
     // const approvedRef = collection(db, collection_name);
     // const nameQuery = query(approvedRef, where("URL", "==", url));
-    // const querySnapshot = await getDocs(nameQuery);
+    // const querySnapshot = getDocs(nameQuery);
 
     // querySnapshot.forEach((doc) => {
     //   return true;

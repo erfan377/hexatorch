@@ -15,9 +15,11 @@ const NameForm = () => {
 
   const [value, setValue] = useState('');
   const [addressBar, setAddressBar] = useState('');
-  const [showApprove, setShowApprove] = useState(false);
+  const [showApproveBlocked, setShowApproveBlocked] = useState(false);
+  const [showApproveSafe, setShowApproveSafe] = useState(false);
   const [showMainPage, setShowMainPage] = useState(true);
-  const [showError, setShowError] = useState(false);
+  const [showErrorBlocked, setShowErrorBlocked] = useState(false);
+  const [showErrorSafe, setShowErrorSafe] = useState(false);
   const [showSafe, setShowSafe] = useState(false);
   const [showBad, setShowBad] = useState(false);
   const [showNotFound, setShowNotFound] = useState(false);
@@ -42,10 +44,15 @@ const NameForm = () => {
   }
 
   function showApprovefn() {
-    if (showApprove) {
+    if (showApproveSafe) {
       return (
         <p>
-          Approved added
+          Approved Safe added
+        </p>)
+    } else if (showApproveBlocked) {
+      return (
+        <p>
+          Approved Blocked added
         </p>)
     } else {
       return (
@@ -57,11 +64,15 @@ const NameForm = () => {
 
 
   function showErrorfn() {
-
-    if (showError) {
+    if (showErrorSafe) {
       return (
         <p>
-          Got an error in adding
+          Got an error in adding, exists in safe list
+        </p>)
+    } else if (showErrorBlocked) {
+      return (
+        <p>
+          Got an error in adding, exists in blocked list
         </p>)
     } else {
       return (
@@ -70,24 +81,14 @@ const NameForm = () => {
     }
   };
 
-
-  function showBadfn() {
-
-    if (showBad) {
-      return (
-        <p>
-          this address is bad
-        </p>)
-    } else {
-      return (
-        <div>
-        </div>);
-    }
-  };
-
-  function showSafefn() {
+  function showState() {
 
     if (showSafe) {
+      return (
+        <p>
+          this address is safe
+        </p>)
+    } else if (showBad) {
       return (
         <p>
           this address is bad
@@ -101,7 +102,15 @@ const NameForm = () => {
 
 
   useEffect(() => {
-  }, [showApprove, showMainPage, showError, showBad, showSafe, showNotFound, addressBar]);
+  }, [showApproveSafe,
+    showApproveBlocked,
+    showMainPage,
+    showErrorSafe,
+    showErrorBlocked,
+    showBad,
+    showSafe,
+    showNotFound,
+    addressBar]);
 
 
   useEffect(() => {
@@ -131,14 +140,13 @@ const NameForm = () => {
 
 
 
-  async function checkAddress(address) {
+  function checkAddress(address) {
     console.log('pop: checkaddress', address);
 
-    chrome.runtime.sendMessage({ command: { type: 'checkAddress', value: address } }, async response => {
+    chrome.runtime.sendMessage({ command: { type: 'checkAddress', value: address } }, response => {
 
       console.log('pop: inside chrome check ad', response)
-      let result = await response;
-      response.then(console.log('pop: result of response,', response))
+      // response.then(console.log('pop: result of response,', response))
       // console.log('pop: result of response,', response)
       if (response === 'safe') {
         setShowSafe(true);
@@ -148,11 +156,11 @@ const NameForm = () => {
         setShowBad(true);
         setShowMainPage(false);
         console.log('pop: checking address blocked')
-
-      } else if (submission) {
-        console.log('pop: checking address not found')
-        setShowMainPage(false);
-        setShowNotFound(true);
+        // } 
+        // else if (submission) {
+        //   console.log('pop: checking address not found')
+        //   setShowMainPage(false);
+        //   setShowNotFound(true);
       } else {
         console.log('pop: just show main page')
         setShowMainPage(true);
@@ -161,7 +169,7 @@ const NameForm = () => {
   };
 
 
-  // async function fetchCurrentTab(){
+  // function fetchCurrentTab(){
 
   //   chrome.runtime.sendMessage({command: {type: 'getAddress', value: ''}}, response => {
 
@@ -184,39 +192,37 @@ const NameForm = () => {
 
 
 
+  const addToDatabase = (action) => {
+    chrome.runtime.sendMessage({ command: { type: action, value: addressBar } }, response => {
+      console.log('response added', response)
+      if (response === 'existsSafe') {
+        setShowErrorSafe(true);
+        setShowMainPage(false);
+        console.log('pop: address exists')
+      } else if (response === 'existsBlocked') {
+        setShowErrorBlocked(true);
+        setShowMainPage(false);
+      } else if (response === 'addedSafe') {
+        setShowApproveSafe(true);
+        setShowMainPage(false);
+        console.log('pop: address added to safe')
+      } else if (response === 'addedBlocked') {
+        setShowApproveBlocked(true);
+        setShowMainPage(false);
+      }
+    })
+
+  }
 
 
   const handleButtonEventSafe = () => {
     console.log("sending info to background for whitelist check");
-
-    chrome.runtime.sendMessage({ command: { type: 'addToSafeList', value: addressBar } }, response => {
-      console.log('response safe', response)
-      if (response === 'existsSafe' || response === 'existsBlocked') {
-        setShowError(true);
-        setShowMainPage(false);
-        console.log('pop: address exists')
-      } else if (response === 'addedSafe' || response === 'addedBlocked') {
-        setShowApprove(true);
-        setShowMainPage(false);
-        console.log('pop: address added to safe')
-      }
-    })
+    addToDatabase('addToSafeList');
   };
 
   const handleButtonEventBlock = () => {
     console.log("sending info to background for blocklist check");
-    chrome.runtime.sendMessage({ command: { type: 'addToBLockedList', value: addressBar } }, response => {
-      console.log('response block', response)
-      if (response === 'existsSafe' || response === 'existsBlocked') {
-        setShowError(true);
-        setShowMainPage(false);
-        console.log('pop: address exists blocked')
-      } else if (response === 'addedSafe' || response === 'addedBLocked') {
-        setShowApprove(true);
-        setShowMainPage(false);
-        console.log('pop: address added to blocked')
-      }
-    })
+    addToDatabase('addToBlockedList');
   };
 
 
@@ -270,8 +276,7 @@ const NameForm = () => {
         {showApprovefn()}
         {showErrorfn()}
         {showNotFoundfn()}
-        {showBadfn()}
-        {showSafefn()}
+        {showState()}
       </div>
     </div>
   );
