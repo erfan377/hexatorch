@@ -267,15 +267,15 @@ chrome.runtime.onInstalled.addListener(() => {
 
 
   const firebaseConfig = {
-    apiKey: "AIzaSyBCB4wc68n3VKUsrPWezCTkH2nGfBxQSEo",
-    authDomain: "lighthouse-758b0.firebaseapp.com",
-    projectId: "lighthouse-758b0",
-    storageBucket: "lighthouse-758b0.appspot.com",
-    messagingSenderId: "306456488253",
-    appId: "1:306456488253:web:df9e0025487e924aecbd54",
-    measurementId: "G-PF5BB7ZBN5"
+    apiKey: process.env.REACT_APP_apiKey,
+    authDomain: process.env.REACT_APP_authDomain,
+    projectId: process.env.REACT_APP_projectId,
+    storageBucket: process.env.REACT_APP_storageBucket,
+    messagingSenderId: process.env.REACT_APP_messagingSenderId,
+    appId: process.env.REACT_APP_appId,
+    measurementId: process.env.REACT_APP_measurementId
   };
-
+  
   const app = initializeApp(firebaseConfig);
   const db = getFirestore();
 
@@ -296,6 +296,5 @@ chrome.runtime.onInstalled.addListener(() => {
     // });
     return false;
   }
-
 
 });
