@@ -2,7 +2,7 @@ import React, { Component, useEffect, useState } from 'react'
 import ReactDOM from 'react-dom'
 import './popup.css'
 import logo from "./logo.jpg";
-import Button from 'react-bootstrap/Button';
+import { Button } from "../components/Button";
 
 // const Ps = {
 //   background-color: 'black',
@@ -231,27 +231,19 @@ const NameForm = () => {
     if (showMainPage) {
       return (
         <form onSubmit={handleSubmit}>
-          <label>
+          <div className="content">
             <input
               type="text"
               placeholder="Type an address and press enter..."
               value={addressBar}
               onChange={e => handleChange(e)}
-              style={{
-                padding: "10px 20px",
-                width: "300px",
-                textAlign: "left",
-                // align: "center",
-                border: "0px",
-                marginLeft: "25px",
-                backgroundColor: '#EDE7E7',
-                borderRadius: '10px',
-              }}
             />
-          </label>
-          <img className='logo' src={logo} />
-          <Button onClick={handleButtonEventSafe}> Add to Safe List</Button>
-          <Button onClick={handleButtonEventBlock}> Add to Block List</Button>
+          </div>
+          {/* <img className="logo" src={logo} /> */}
+          <div className="content">
+            <Button onClick={handleButtonEventSafe} color="primary">Add to Safelist</Button>
+            <Button onClick={handleButtonEventBlock} color="secondary">Add to Blocklist</Button>
+          </div>
         </form>
       );
 

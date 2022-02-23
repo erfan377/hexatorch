@@ -1,37 +1,33 @@
 body {
   flex-direction: column;
-  background-color: 'white';
+  background-color: #FFFFFF;
   height: 400px;
-  width: 400px;
+  width: 350px;
   margin: 0px;
   border-radius: 10px;
   align-content: center;
 }
-.header {
-  background-color: #2C02A7;
-  color: #FFFFFF;
-  height: 65px;
-  width: 400px;
-  margin-top: 0px;
-  margin-left: 0px;
-  margin-right: 0px;
-  margin-bottom: 20px;
-}
-.gaspricetitle {
-  position: relative;
-  top: 10px;
-  margin-left: 10px;
-  margin-top: 10px;
-  font-size: 18px;
-  text-align: center;
 
+.header {
+  background-color: #423AFB;
+  color: #FFFFFF;
+  height: 55px;
+  width: 400px;
+  display: block;
+  margin: auto;
+  padding-top: 10px;
 }
-.gasprice {
+
+text.gaspricetitle {
   position: relative;
-  top: 10px;
-  margin-left: 10px;
-  margin-top: 10px;
-  font-size: 18px;
+  padding: 15px;
+  font-size: 14px;
+  text-align: left;
+}
+text.gasprice {
+  position: relative;
+  padding: 15px;
+  font-size: 16px;
   font-weight: bold;
 }
 .logo {
@@ -40,4 +36,21 @@ body {
   align-self: center;
   margin-left: 100px;
   margin-top: 30px;
+}
+
+div.content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+}
+
+input {
+  padding: 10px;
+  width: 300px;
+  text-align: left;
+  border: 10px;
+  border-color: #423AFB;
+  background-color: #EDE7E7;
+  border-radius: 10px;
 }
