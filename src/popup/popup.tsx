@@ -12,7 +12,7 @@ import Button from 'react-bootstrap/Button';
 
 
 const NameForm = () => {
-
+  //var port = chrome.runtime.connect({name: "myChannel"});
   const [value, setValue] = useState('');
   const [addressBar, setAddressBar] = useState('');
   const [showApproveBlocked, setShowApproveBlocked] = useState(false);
@@ -143,10 +143,13 @@ const NameForm = () => {
   function checkAddress(address) {
     console.log('pop: checkaddress', address);
 
+    //chrome.extension.getBackgroundPage().window.location.reload();
+    
     chrome.runtime.sendMessage({ command: { type: 'checkAddress', value: address } }, response => {
 
-      console.log('pop: inside chrome check ad', response)
-      // response.then(console.log('pop: result of response,', response))
+  
+      console.log('pop: inside chrome check ad',  response)
+      //response.then(console.log('pop: result of response,', response))
       // console.log('pop: result of response,', response)
       if (response === 'safe') {
         setShowSafe(true);
@@ -165,7 +168,8 @@ const NameForm = () => {
         console.log('pop: just show main page')
         setShowMainPage(true);
       }
-    })
+    }
+    )
   };
 
 
