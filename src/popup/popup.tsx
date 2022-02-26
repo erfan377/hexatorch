@@ -1,285 +1,329 @@
-
-import React, {Component, useEffect, useState} from 'react'
+import React, { Component, useEffect, useState } from 'react'
 import ReactDOM from 'react-dom'
-import  './popup.css'
+import './popup.css'
 import logo from "./logo.jpg";
 import Button from 'react-bootstrap/Button';
-
-// const Ps = {
-//   background-color: 'black',
-//   height: 1000,
-//   width: 1000,
-// }
+import isURL from 'validator/lib/isURL';
 
 
+
+
+// var validUrl = require('valid-url');
+// console.log('')
 const NameForm = () => {
 
-  // constructor(props) {
-  //   super(props);
-  //   this.state = {value: ''};
-
-  //   this.handleChange = this.handleChange.bind(this);
-  //   this.handleSubmit = this.handleSubmit.bind(this);
-  // }
-
-  const [value, setValue] = useState({value: ''});
-  const [showApprove, setShowApprove] = useState(false);
-  const [showMainPage, setShowMainPage] = useState(true);
-  const [showError, setShowError] = useState(false);
-  const [showSafe, setShowSafe] = useState(false);
-  const [showBad, setShowBad] = useState(false);
-
-  function handleChange(event) {
-    // this.setState({value: event.target.value});
-    // alert(event.target.value);
-    setValue({value: event.target.value});
+  async function getGas() {
+    let response = await fetch(`https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=${process.env.ETHERSCAN_apiKey}`);
+    let responseJson = await response.json();
+    let gasGwei = responseJson.result.SafeGasPrice
+    response = await fetch(`https://api.etherscan.io/api?module=stats&action=ethprice&apikey=${process.env.ETHERSCAN_apiKey}`);
+    responseJson = await response.json();
+    let ethUsd = responseJson.result.ethusd
+    let averagePrice = ethUsd * gasGwei / 1000000000 * 21000
+    averagePrice = parseFloat(averagePrice.toFixed(3))
+    setGas({ gwei: gasGwei, usd: averagePrice })
   }
 
 
-  function showApprovefn(){
-    console.log('noyesss')
 
-    if (showApprove){
-      console.log('yesss')
-      return(
+  const [addressBar, setAddressBar] = useState('');
+  const [page, setPage] = useState('main');
+  const [gas, setGas] = useState({ gwei: 0, usd: 0 });
+
+  function handleChange(event) {
+    event.preventDefault();
+    setAddressBar(event.target.value);
+  }
+
+  function showNotFoundfn() {
+    return (
       <p>
-        Approved added
-      </p>)
-    } else {
-      return(
-      <div>
-      </div>);
-    }
-  };
+        Nothing was found
+      </p>
+    )
+  }
 
-
-
-  function showErrorfn(){
-    console.log('noyesss')
-
-    if (showApprove){
-      console.log('yesss')
-      return(
+  function showRemovedfn() {
+    return (
       <p>
-        Got an error in adding
-      </p>)
-    } else {
-      return(
+        {addressBar} was removed from your list
+      </p>
+    )
+  }
+
+
+  function showApproveBlockedfn() {
+    return (
       <div>
-      </div>);
-    }
-  };
+        <p>
+          Approved blocked added {addressBar}
+        </p>
+        <Button onClick={handleRemoveButtonEvent}> Remove from blocked</Button>
+      </div>
+    )
+  }
+
+  function showApproveSafefn() {
+    return (
+      <div>
+        <p>
+          Approved Safe added {addressBar}
+        </p>
+        <Button onClick={handleRemoveButtonEvent}> Remove from SafeList</Button>
+      </div>
+    )
+  }
 
 
-  function showBadfn(){
-    console.log('noyesss')
-
-    if (showBad){
-      console.log('yesss')
-      return(
+  function showErrorAddfn() {
+    return (
       <p>
-        this address is bad
-      </p>)
-    } else {
-      return(
-      <div>
-      </div>);
-    }
-  };
+        Got an error in adding {addressBar}
+      </p>
+    )
+  }
 
-  function showSafefn(){
-    console.log('noyesss')
+  function showBlockedStateServer() {
+    return (
+      <div className='BlockedPage'>
+        <p>
+          {addressBar} address is bad
+        </p>
 
-    if (showSafe){
-      console.log('yesss')
-      return(
-      <p>
-        this address is bad
-      </p>)
-    } else {
-      return(
+        <Button onClick={handleRemoveButtonEvent}> Remove from BlockedList</Button>
+      </div>
+    )
+  }
+
+  function showBlockedStateLocal() {
+    return (
+      <div className='BlockedPage'>
+        <p>
+          {addressBar} address is bad
+        </p>
+
+        <Button onClick={handleRemoveButtonEvent}> Remove from BlockedList</Button>
+      </div>
+    )
+  }
+
+  function showSafeStateServer() {
+    return (
+      <div className='SafePage'>
+        <p>
+          {addressBar} address is safe
+        </p>
+
+        <Button onClick={handleRemoveButtonEvent}> Remove from SafeList</Button>
+      </div>
+    )
+  }
+
+  function showSafeStateLocal() {
+    return (
+      <div className='SafePage'>
+        <p>
+          {addressBar} address is safe
+        </p>
+
+        <Button onClick={handleRemoveButtonEvent}> Remove from SafeList</Button>
+      </div>
+    )
+  }
+
+  function showErrorType() {
+    return (
       <div>
-      </div>);
-    }
-  };
+        <p>
+          {addressBar} address is not valid address
+        </p>
+      </div>
+    )
+  }
+
+  useEffect(() => {
+    getGas()
+    showPage()
+  }, [addressBar, page]);
+
 
 
   useEffect(() => {
-  }, [showApprove, showMainPage, showError, showBad, showSafe]);
+    if (page === 'removed' || page === 'notFound') {
+      setPage('main')
+    }
+    getGas()
+    chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
+      let tmpurl = tabs[0].url;
+      let tmp = new URL(tmpurl);
+      if (isURL(tmp.hostname.toLowerCase())) {
+        setAddressBar(tmp.hostname.toLowerCase());
+        checkAddress(tmp.hostname.toLowerCase(), false);
+      }
+    })
+  }, []);
 
 
-   //Todo handle blocklist
-   function handleSubmit(event) {
+  function handleSubmit(event) {
     event.preventDefault();
-    // This is for approve
-    chrome.runtime.sendMessage({foo: {type: 'addToSafeList', value: value.value}}, response => {
-      if (response === 'true'){
-        setShowApprove(true);
-        setShowMainPage(false);
-        console.log('yayyy')
-      } else {
-        setShowError(true);
-        setShowMainPage(false);
-        console.log('oh no')
-      }
-    })
-  }
-
-
-
-  function checkAddress() {
-    chrome.runtime.sendMessage({foo: {type: 'checkAddress', value: value.value}}, response => {
-      if (response === 'found good'){
-        setShowSafe(true);
-        setShowMainPage(false);
-        console.log('yayyy')
-      } else if(response === 'found bad'){
-        setShowBad(true);
-        setShowMainPage(false);
-        console.log('oh no')
-      } else if(response === 'not found'){
-        setShowMainPage(true);
-      }
-    })
-  }
-
-
-  function mainpage() {
-    if(showMainPage){
-      return (
-        <form onSubmit={handleSubmit}>
-          <label>
-            <input
-              type="text"
-              placeholder="Type an address and press enter..."
-              value={value.value}
-              onChange={e => handleChange(e)}
-              style={{
-                padding: "10px 20px",
-                width: "300px",
-                textAlign: "left",
-                // align: "center",
-                border: "0px",
-                marginLeft: "25px",
-                backgroundColor: '#EDE7E7',
-                borderRadius: '10px',
-              }}
-            />
-          </label>
-          <img className = 'logo' src = {logo}/>
-          <Button variant="primary" type="submit"> Safe List</Button>
-        </form>
-      );
-    
+    if (isURL(addressBar.toLowerCase())) {
+      checkAddress(addressBar.toLowerCase(), true)
     } else {
-      return(
-      <div>
-      </div>);
+      setPage('errorType')
     }
   }
-  
+
+
+
+  function checkAddress(address, submission) {
+    chrome.runtime.sendMessage({ command: { type: 'checkAddress', value: address } }, response => {
+      if (response === 'safeLocal') {
+        setPage('safeLocal')
+      } else if (response === 'safeServer') {
+        setPage('safeServer')
+      } else if (response === 'blockedLocal') {
+        setPage('blockedLocal')
+      } else if (response === 'blockedServer') {
+        setPage('blockedServer')
+      } else if (response === 'notFound' && submission == true) {
+        setPage('notFound')
+      }
+    })
+  };
+
+
+  function showPage() {
+    if (page === 'main') {
+
+      return mainpage()
+
+    } else if (page === 'addedSafe') {
+
+      return showApproveSafefn()
+    } else if (page === 'addedBlocked') {
+
+      return showApproveBlockedfn()
+
+    } else if (page === 'blockedLocal') {
+
+      return showBlockedStateLocal()
+
+    } else if (page === 'blockedServer') {
+
+      return showBlockedStateServer()
+
+    } else if (page === 'safeLocal') {
+
+      return showSafeStateLocal()
+    }
+    else if (page === 'safeServer') {
+
+      return showSafeStateServer()
+    }
+    else if (page === 'removed') {
+
+      return showRemovedfn()
+
+    } else if (page === 'notFound') {
+
+      return showNotFoundfn()
+
+    } else if (page === 'errorAdding') {
+
+      return showErrorAddfn()
+
+    } else if (page === 'errorType') {
+
+      return showErrorType()
+
+    } else {
+      return (
+        <div>
+        </div>
+      )
+    }
+  }
+
+
+
+  const addToDatabase = (action, address) => {
+    chrome.runtime.sendMessage({ command: { type: action, value: address } }, response => {
+      if (response === 'existsSafe' || response === 'existsBlocked') {
+        setPage('errorAdding')
+      } else if (response === 'addedSafe') {
+        setPage('addedSafe')
+      } else if (response === 'addedBlocked') {
+        setPage('addedBlocked')
+      }
+    })
+  }
+
+
+  const handleRemoveButtonEvent = () => {
+    chrome.runtime.sendMessage({ command: { type: 'removeAddress', value: addressBar } }, response => {
+      if (response === 'removedSafe' || response === 'removedBlocked') {
+        setPage('removed')
+        return true
+      }
+    })
+  }
+
+  function handleAddButtonEvent(command) {
+    if (isURL(addressBar.toLowerCase())) {
+      addToDatabase(command, addressBar.toLowerCase());
+    } else {
+      setPage('errorType')
+    }
+  };
+
+  function mainpage() {
+    return (
+      <form onSubmit={handleSubmit}>
+        <label>
+          <input
+            type="text"
+            placeholder="Type an address and press enter..."
+            value={addressBar}
+            onChange={e => handleChange(e)}
+            style={{
+              padding: "10px 20px",
+              width: "300px",
+              textAlign: "left",
+              border: "0px",
+              marginLeft: "25px",
+              backgroundColor: '#EDE7E7',
+              borderRadius: '10px',
+            }}
+          />
+        </label>
+        <img className='logo' src={logo} />
+        <Button onClick={() => handleAddButtonEvent('addToSafeList')}> Add to Safe List</Button>
+        <Button onClick={() => handleAddButtonEvent('addToBlockedList')}> Add to Block List</Button>
+      </form>
+    )
+  }
+
   return (
     <div className='body'>
-        {checkAddress()}
-        {showBadfn()}
-        {showSafefn()}
-        <div className='header'>
-          <text className = 'gaspricetitle'> ETH Mid Gas Price: </text>
-          <br />
-          <text className = 'gasprice'>  73 Gwei, $3.84 USD </text>
-        </div>
-        <div className='mainPage'>
-          {mainpage()}
-        </div>
-        <div id='nextPages'>
-          {showApprovefn()}
-          {showErrorfn()}
-        </div>
+      <div className='header'>
+        <text className='gaspricetitle'> ETH Mid Gas Price: </text>
+        <br />
+        <text className='gasprice'>  {gas.gwei} Gwei, ${gas.usd} USD </text>
+      </div>
+      <div className='mainPage'>
+        {showPage()}
+      </div>
     </div>
   );
 
 }
 
-// class NameForm extends React.Component<{}, { value: string }> {
-
-//   constructor(props) {
-//     super(props);
-//     this.state = {value: ''};
-
-//     this.handleChange = this.handleChange.bind(this);
-//     this.handleSubmit = this.handleSubmit.bind(this);
-//   }
-
-//   handleChange(event) {
-//     this.setState({value: event.target.value});
-//   }
-
-
-//   //Todo handle blocklist
-//   handleSubmit(event) {
-
-//     // This is for approve
-//     chrome.runtime.sendMessage({foo: {type: 'addToSafeList', value: this.state.value}}, response => {
-//       if (response === 'true'){
-//         // TODO: Show new page
-//         console.log('yayyy')
-//       } else {
-//         // TODO:Show it existed
-//         console.log('oh no')
-//       }
-//     });
-//     event.preventDefault();
-//   }
-
-//   render() {
-//     return (
-//       <div className='body'>
-//         <div className='header'>
-//           <text className = 'gaspricetitle'> ETH Mid Gas Price: </text>
-//           <br />
-//           <text className = 'gasprice'>  73 Gwei, $3.84 USD </text>
-//         </div>
-//         <div id='main page'>
-//           <form onSubmit={this.handleSubmit}>
-//             <label>
-//               <input
-//                 type="text"
-//                 placeholder="Type an address and press enter..."
-//                 value={this.state.value}
-//                 onChange={this.handleChange}
-//                 style={{
-//                   padding: "10px 20px",
-//                   width: "300px",
-//                   textAlign: "left",
-//                   // align: "center",
-//                   border: "0px",
-//                   marginLeft: "25px",
-//                   backgroundColor: '#EDE7E7',
-//                   borderRadius: '10px',
-//                 }}
-//               />
-//             </label>
-//             <img className = 'logo' src = {logo}/>
-//             <Button variant="primary" type="submit"> Safe List</Button>
-//           </form>
-//         </div>
-//     </div>
-//     );
-//   }
-// }
-
-// function sendForm(){
-//   //check for validity of link
-// }
-
-
 const App: React.FC<{}> = () => {
   return (
-      <NameForm/>
+    <NameForm />
   )
 }
 
 const root = document.createElement('div')
 document.body.appendChild(root)
 ReactDOM.render(<App />, root)
-
