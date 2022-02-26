@@ -12,9 +12,23 @@ import isURL from 'validator/lib/isURL';
 // console.log('')
 const NameForm = () => {
 
+  async function getGas() {
+    let response = await fetch(`https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=${process.env.ETHERSCAN_apiKey}`);
+    let responseJson = await response.json();
+    let gasGwei = responseJson.result.SafeGasPrice
+    response = await fetch(`https://api.etherscan.io/api?module=stats&action=ethprice&apikey=${process.env.ETHERSCAN_apiKey}`);
+    responseJson = await response.json();
+    let ethUsd = responseJson.result.ethusd
+    let averagePrice = ethUsd * gasGwei / 1000000000 * 21000
+    averagePrice = parseFloat(averagePrice.toFixed(3))
+    setGas({ gwei: gasGwei, usd: averagePrice })
+  }
+
+
 
   const [addressBar, setAddressBar] = useState('');
   const [page, setPage] = useState('main');
+  const [gas, setGas] = useState({ gwei: 0, usd: 0 });
 
   function handleChange(event) {
     event.preventDefault();
@@ -128,7 +142,7 @@ const NameForm = () => {
   }
 
   useEffect(() => {
-
+    getGas()
     showPage()
   }, [addressBar, page]);
 
@@ -138,7 +152,7 @@ const NameForm = () => {
     if (page === 'removed' || page === 'notFound') {
       setPage('main')
     }
-
+    getGas()
     chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
       let tmpurl = tabs[0].url;
       let tmp = new URL(tmpurl);
@@ -294,7 +308,7 @@ const NameForm = () => {
       <div className='header'>
         <text className='gaspricetitle'> ETH Mid Gas Price: </text>
         <br />
-        <text className='gasprice'>  73 Gwei, $3.84 USD </text>
+        <text className='gasprice'>  {gas.gwei} Gwei, ${gas.usd} USD </text>
       </div>
       <div className='mainPage'>
         {showPage()}

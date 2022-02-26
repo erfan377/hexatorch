@@ -149,13 +149,13 @@ async function run(currentHost: string) {
 }
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBCB4wc68n3VKUsrPWzCTkH2nGfBxQSEo",
-  authDomain: "lighthouse-758b0.firebaseapp.com",
-  projectId: "lighthouse-758b0",
-  storageBucket: "lighthouse-758b0.appspot.com",
-  messagingSenderId: "306456488253",
-  appId: "1:306456488253:web:df9e0025487e924aecbd54",
-  measurementId: "G-PF5BB7ZBN5"
+  apiKey: process.env.FIREBASE_apiKey,
+  authDomain: process.env.FIREBASE_authDomain,
+  projectId: process.env.FIREBASE_projectId,
+  storageBucket: process.env.FIREBASE_storageBucket,
+  messagingSenderId: process.env.FIREBASE_messagingSenderId,
+  appId: process.env.FIREBASE_appId,
+  measurementId: process.env.FIREBASE_measurementId
 };
 
 try {
@@ -217,7 +217,6 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
 });
 
 chrome.tabs.onActivated.addListener(function (info) {
-
   // chrome.notifications.create(
   //   'reminder', {
   //   type: 'basic',
