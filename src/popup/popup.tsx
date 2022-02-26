@@ -83,7 +83,7 @@ const NameForm = () => {
         <p>
           {addressBar} address is bad on server
         </p>
-
+        <Button onClick={() => handleAddButtonEvent('addToSafeList')}> Add to Safe List</Button>
       </div>
     )
   }
@@ -94,7 +94,6 @@ const NameForm = () => {
         <p>
           {addressBar} address is bad locally
         </p>
-
         <Button onClick={handleRemoveButtonEvent}> Remove from BlockedList</Button>
       </div>
     )
@@ -106,7 +105,7 @@ const NameForm = () => {
         <p>
           {addressBar} address is safe on server
         </p>
-
+        <Button onClick={() => handleAddButtonEvent('addToBlockedList')}> Add to Block List</Button>
       </div>
     )
   }
