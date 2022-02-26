@@ -145,8 +145,8 @@ const NameForm = () => {
     getGas()
     chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
       let tmpurl = tabs[0].url;
-      let tmp = new URL(tmpurl);
-      if (isURL(tmp.hostname.toLowerCase())) {
+      if (isURL(tmpurl)) {
+        let tmp = new URL(tmpurl);
         setAddressBar(tmp.hostname.toLowerCase());
         checkAddress(tmp.hostname.toLowerCase(), false);
       }
@@ -156,7 +156,7 @@ const NameForm = () => {
 
   function handleSubmit(event) {
     event.preventDefault();
-    if (isURL(addressBar.toLowerCase())) {
+    if (isURL(addressBar)) {
       checkAddress(addressBar.toLowerCase(), true)
     } else {
       setPage('errorType')
