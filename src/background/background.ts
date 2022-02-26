@@ -1,7 +1,10 @@
 // // TODO: background script
 import { initializeApp } from "firebase/app";
-import { doc, getFirestore, getDoc, collection, setDoc, query, where, getDocs } from "firebase/firestore";
+import { getFirestore, collection, getDocs } from "firebase/firestore";
 
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.alarms.create('fetchServer', { when: Date.now(), periodInMinutes: 30 })
+})
 
 const getObjectFromLocalStorage = async function (key) {
   return new Promise<any[]>((resolve, reject) => {
@@ -17,26 +20,12 @@ const getObjectFromLocalStorage = async function (key) {
 
 async function fetchLocal(listype) {
   var emptylist = [];
-  if (listype == "approvedlist") {
-    var localApprovedlist = await getObjectFromLocalStorage("approvedlist");
-    if (localApprovedlist != undefined) {
-      return localApprovedlist;
-    }
-    else {
-      //approvedlist is empty
-      return emptylist;
-    }
+  var localApprovedlist = await getObjectFromLocalStorage(listype);
+  if (localApprovedlist != undefined) {
+    return localApprovedlist;
   }
-  else if (listype == "blockedlist") {
-    var localblockedlist = await getObjectFromLocalStorage("blockedlist");
-    if (localblockedlist != undefined) {
-      return localblockedlist;
-    }
-    else {
-      //blockedlist is empty
-      return emptylist;
-    }
-
+  else {
+    return emptylist;
   }
 }
 
@@ -113,6 +102,8 @@ async function addURL(newURL, listtype) {
 async function checkURL(currelhost) {
   var localApprovedlist = await fetchLocal("approvedlist");
   var localBlockedlist = await fetchLocal("blockedlist");
+  var serverApprovedList = await fetchLocal("serverApprovedList");
+  var serverBlockedList = await fetchLocal("serverBlockedList");
 
   var results = {
     "inUserApprovedlist": false,
@@ -128,11 +119,11 @@ async function checkURL(currelhost) {
   if (localBlockedlist.includes(currelhost)) {
     results["inUserBlockedlist"] = true;
   }
-  if (serverLookup("malicious_links", currelhost)) {
+  if (serverApprovedList.includes(currelhost)) {
     results["inServerBlockedlist"] = true;
   }
 
-  if (serverLookup("approved_links", currelhost)) {
+  if (serverBlockedList.includes(currelhost)) {
     results["inServerApprovedlist"] = true;
   }
   return results;
@@ -166,23 +157,28 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore();
 
-//function query() {
-// const approvedRef = collection(db, collection_name);
-// const nameQuery = query(approvedRef, where("URL", "==", url));
-// const querySnapshot = getDocs(nameQuery);
-//}
 
-function serverLookup(collection_name, url) {
-  // // Initialize Firebase
-  // const approvedRef = collection(db, collection_name);
-  // const nameQuery = query(approvedRef, where("URL", "==", url));
-  // const querySnapshot = getDocs(nameQuery);
-
-  // querySnapshot.forEach((doc) => {
-  //   return true;
-  // });
-  return false;
+async function fetchServer(list) {
+  const querySnapshot = await getDocs(collection(db, list));
+  let urlList = [];
+  querySnapshot.forEach((doc) => {
+    urlList.push(doc.data().URL)
+  })
+  return urlList
 }
+
+async function cacheServer() {
+  console.log('caching')
+  let safeUrl = await fetchServer('approved_links')
+  chrome.storage.local.set({ "serverApprovedList": safeUrl });
+  let blockedUrl = await fetchServer('malicious_links')
+  chrome.storage.local.set({ "serverBlockedlist": blockedUrl });
+}
+
+chrome.alarms.onAlarm.addListener(cacheServer)
+
+// cacheServer()
+
 
 
 // function deleteURL(newURL, listtype) {
