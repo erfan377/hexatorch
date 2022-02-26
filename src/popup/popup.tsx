@@ -69,7 +69,7 @@ const NameForm = () => {
     )
   }
 
-  function showBlockedState() {
+  function showBlockedStateServer() {
     return (
       <div className='BlockedPage'>
         <p>
@@ -81,7 +81,31 @@ const NameForm = () => {
     )
   }
 
-  function showSafeState() {
+  function showBlockedStateLocal() {
+    return (
+      <div className='BlockedPage'>
+        <p>
+          {addressBar} address is bad
+        </p>
+
+        <Button onClick={handleRemoveButtonEvent}> Remove from BlockedList</Button>
+      </div>
+    )
+  }
+
+  function showSafeStateServer() {
+    return (
+      <div className='SafePage'>
+        <p>
+          {addressBar} address is safe
+        </p>
+
+        <Button onClick={handleRemoveButtonEvent}> Remove from SafeList</Button>
+      </div>
+    )
+  }
+
+  function showSafeStateLocal() {
     return (
       <div className='SafePage'>
         <p>
@@ -128,8 +152,8 @@ const NameForm = () => {
 
   function handleSubmit(event) {
     event.preventDefault();
-    if (isURL(addressBar)) {
-      checkAddress(addressBar, true)
+    if (isURL(addressBar.toLowerCase())) {
+      checkAddress(addressBar.toLowerCase(), true)
     } else {
       setPage('errorType')
     }
@@ -139,10 +163,14 @@ const NameForm = () => {
 
   function checkAddress(address, submission) {
     chrome.runtime.sendMessage({ command: { type: 'checkAddress', value: address } }, response => {
-      if (response === 'safe') {
-        setPage('safe')
-      } else if (response === 'blocked') {
-        setPage('blocked')
+      if (response === 'safeLocal') {
+        setPage('safeLocal')
+      } else if (response === 'safeServer') {
+        setPage('safeServer')
+      } else if (response === 'blockedLocal') {
+        setPage('blockedLocal')
+      } else if (response === 'blockedServer') {
+        setPage('blockedServer')
       } else if (response === 'notFound' && submission == true) {
         setPage('notFound')
       }
@@ -162,15 +190,23 @@ const NameForm = () => {
 
       return showApproveBlockedfn()
 
-    } else if (page === 'blocked') {
+    } else if (page === 'blockedLocal') {
 
-      return showBlockedState()
+      return showBlockedStateLocal()
 
-    } else if (page === 'safe') {
+    } else if (page === 'blockedServer') {
 
-      return showSafeState()
+      return showBlockedStateServer()
 
-    } else if (page === 'removed') {
+    } else if (page === 'safeLocal') {
+
+      return showSafeStateLocal()
+    }
+    else if (page === 'safeServer') {
+
+      return showSafeStateServer()
+    }
+    else if (page === 'removed') {
 
       return showRemovedfn()
 
@@ -196,8 +232,8 @@ const NameForm = () => {
 
 
 
-  const addToDatabase = (action) => {
-    chrome.runtime.sendMessage({ command: { type: action, value: addressBar } }, response => {
+  const addToDatabase = (action, address) => {
+    chrome.runtime.sendMessage({ command: { type: action, value: address } }, response => {
       if (response === 'existsSafe' || response === 'existsBlocked') {
         setPage('errorAdding')
       } else if (response === 'addedSafe') {
@@ -211,9 +247,7 @@ const NameForm = () => {
 
   const handleRemoveButtonEvent = () => {
     chrome.runtime.sendMessage({ command: { type: 'removeAddress', value: addressBar } }, response => {
-      console.log('response remove', response)
       if (response === 'removedSafe' || response === 'removedBlocked') {
-        console.log('yesss removed', response)
         setPage('removed')
         return true
       }
@@ -221,8 +255,8 @@ const NameForm = () => {
   }
 
   function handleAddButtonEvent(command) {
-    if (isURL(addressBar)) {
-      addToDatabase(command);
+    if (isURL(addressBar.toLowerCase())) {
+      addToDatabase(command, addressBar.toLowerCase());
     } else {
       setPage('errorType')
     }

@@ -17,7 +17,8 @@
     "storage",
     "activeTab",
     "tabs",
-    "alarms"
+    "alarms",
+    "notifications"
   ],
   "options_page": "options.html",
   "background": {

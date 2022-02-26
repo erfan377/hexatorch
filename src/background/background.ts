@@ -1,6 +1,7 @@
 // // TODO: background script
 import { initializeApp } from "firebase/app";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
+import isURL from 'validator/lib/isURL';
 
 chrome.runtime.onInstalled.addListener(() => {
   chrome.alarms.create('fetchServer', { when: Date.now(), periodInMinutes: 30 })
@@ -80,7 +81,7 @@ async function addURL(newURL, listtype) {
     }
     else {
       localApprovedlist.push(newURL);
-      console.log("successfully added " + newURL + " to the approvedlist");
+      // console.log("successfully added " + newURL + " to the approvedlist");
       chrome.storage.local.set({ "approvedlist": localApprovedlist });
       return 'addedSafe';
     }
@@ -92,7 +93,7 @@ async function addURL(newURL, listtype) {
     }
     else {
       localBlockedlist.push(newURL);
-      console.log("successfully added " + newURL + " to the blockedList");
+      // console.log("successfully added " + newURL + " to the blockedList");
       chrome.storage.local.set({ "blockedlist": localBlockedlist });
       return 'addedBlocked';
     }
@@ -133,11 +134,14 @@ async function run(currentHost: string) {
   let results = await checkURL(currentHost);
   if (results["inUserApprovedlist"] || results["inServerBlockedlist"]) {
     //it's in the approved list
-    return 'safe';
-  }
-  else if (results["inUserBlockedlist"] || results["inServerBlockedlist"]) {
+    return 'safeLocal';
+  } else if (results["inServerBlockedlist"]) {
+    return 'safeServer';
+  } else if (results["inUserBlockedlist"] || results["inServerBlockedlist"]) {
     //it's in the blocked list
-    return 'blocked';
+    return 'blockedLocal';
+  } else if (results["inServerBlockedlist"]) {
+    return 'blockedServer';
   } else {
     //didn't find it
     return 'notFound';
@@ -145,7 +149,7 @@ async function run(currentHost: string) {
 }
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBCB4wc68n3VKUsrPWezCTkH2nGfBxQSEo",
+  apiKey: "AIzaSyBCB4wc68n3VKUsrPWzCTkH2nGfBxQSEo",
   authDomain: "lighthouse-758b0.firebaseapp.com",
   projectId: "lighthouse-758b0",
   storageBucket: "lighthouse-758b0.appspot.com",
@@ -154,83 +158,84 @@ const firebaseConfig = {
   measurementId: "G-PF5BB7ZBN5"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore();
+try {
 
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore();
+  async function fetchServer(list) {
+    const querySnapshot = await getDocs(collection(db, list));
+    let urlList = [];
+    querySnapshot.forEach((doc) => {
+      urlList.push(doc.data().URL)
+    })
+    return urlList
+  }
+  async function cacheServer() {
+    let safeUrl = await fetchServer('approved_links')
+    chrome.storage.local.set({ "serverApprovedList": safeUrl });
+    let blockedUrl = await fetchServer('malicious_links')
+    chrome.storage.local.set({ "serverBlockedlist": blockedUrl });
+  }
+  chrome.alarms.onAlarm.addListener(cacheServer)
 
-async function fetchServer(list) {
-  const querySnapshot = await getDocs(collection(db, list));
-  let urlList = [];
-  querySnapshot.forEach((doc) => {
-    urlList.push(doc.data().URL)
-  })
-  return urlList
+} catch (ex) {
+  console.log('Trouble launching firebase', ex)
 }
 
-async function cacheServer() {
-  let safeUrl = await fetchServer('approved_links')
-  chrome.storage.local.set({ "serverApprovedList": safeUrl });
-  let blockedUrl = await fetchServer('malicious_links')
-  chrome.storage.local.set({ "serverBlockedlist": blockedUrl });
+
+function checkRunResult(result) {
+  if (result === 'safeLocal' || result === 'safeServer') {
+    chrome.action.setBadgeText({ text: 'SAFE' });
+    chrome.action.setBadgeBackgroundColor({ color: '#00FF00' });
+  } else if (result === 'blockedLocal' || result === 'blockedServer') {
+
+    chrome.notifications.create(
+      'reminder', {
+      type: 'basic',
+      title: 'Don\'t forget!',
+      iconUrl: "static/icon.png",
+      message: 'You have ' + ' things to do. Wake up, dude!',
+      priority: 2
+    })
+
+    chrome.action.setBadgeText({ text: 'BAD' });
+    chrome.action.setBadgeBackgroundColor({ color: '#FF0000' });
+  } else if (result === 'notFound') {
+    chrome.action.setBadgeText({ text: '' });
+  }
 }
 
-chrome.alarms.onAlarm.addListener(cacheServer)
+chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
+  console.log(tab.url);
+  var tmpURL = new URL(tab.url);
+  let url = tmpURL.hostname.toLowerCase()
+  if (isURL(url)) {
+    run(url).then((result) => {
+      checkRunResult(result)
+    })
+  }
+});
 
-// cacheServer()
+chrome.tabs.onActivated.addListener(function (info) {
+
+  // chrome.notifications.create(
+  //   'reminder', {
+  //   type: 'basic',
+  //   title: 'Don\'t forget!',
+  //   iconUrl: "http://www.google.com/favicon.ico",
+  //   message: 'You have things to do. Wake up, dude!',
+  //   priority: 2
+  // }, function (id) { console.log("Last error:", chrome.runtime.lastError); })
 
 
-
-// function deleteURL(newURL, listtype) {
-//   var localApprovedlist = [];
-//   var localBlockedlist = [];
-//   fetchLocal("approvedlist").then(function (v) { localApprovedlist = v });
-//   fetchLocal("blockedlist").then(function (v) { localApprovedlist = v });
-
-//   if (listtype == "approvedlist") {
-//     if (localApprovedlist.includes(newURL)) {
-//       var idx = localApprovedlist.indexOf(newURL);
-//       if (idx != -1) localApprovedlist.splice(idx, 1);
-//       chrome.storage.local.set({ "approvedlist": localApprovedlist });
-//     }
-//     else {
-//       console.log("URLs does not exist in approvedlist");
-//     }
-//   }
-//   else if (listtype == "blockedlist") {
-//     if (localBlockedlist.includes(newURL)) {
-//       var idx = localBlockedlist.indexOf(newURL);
-//       if (idx != -1) localBlockedlist.splice(idx, 1);
-//       chrome.storage.local.set({ "blockedlist": localBlockedlist });
-//     }
-//     else {
-//       console.log("URLs does not exist in blockedlist");
-//     }
-//   }
-// }
-
-// function updateURL(oldURL, newURL, listtype) {
-//   var localApprovedlist = [];
-//   var localBlockedlist = [];
-//   fetchLocal("approvedlist").then(function (v) { localApprovedlist = v });
-//   fetchLocal("blockedlist").then(function (v) { localApprovedlist = v });
-//   if (listtype == "approvedlist") {
-//     if (localApprovedlist.includes(oldURL)) {
-//       var idx = localApprovedlist.indexOf(oldURL);
-//       if (idx != -1) localApprovedlist[idx] = newURL;
-//       chrome.storage.local.set({ "approvedlist": localApprovedlist });
-//     }
-//     else {
-//       console.log("URL does not exist in approvedlist");
-//     }
-//   }
-//   else if (listtype == "blockedlist") {
-//     if (localBlockedlist.includes(newURL)) {
-//       var idx = localBlockedlist.indexOf(newURL);
-//       if (idx != -1) localBlockedlist[idx] = newURL;
-//       chrome.storage.local.set({ "blockedlist": localBlockedlist });
-//     }
-//     else {
-//       console.log("URL does not exist in blockedlist");
-//     }
-//   }
-// }
+  chrome.tabs.get(info.tabId, function (tab) {
+    var tmpURL = new URL(tab.url);
+    let url = tmpURL.hostname.toLowerCase()
+    console.log('changing tab', url)
+    if (isURL(url)) {
+      run(url).then((result) => {
+        checkRunResult(result)
+      })
+    }
+  });
+});
