@@ -168,7 +168,6 @@ async function fetchServer(list) {
 }
 
 async function cacheServer() {
-  console.log('caching')
   let safeUrl = await fetchServer('approved_links')
   chrome.storage.local.set({ "serverApprovedList": safeUrl });
   let blockedUrl = await fetchServer('malicious_links')

@@ -3,10 +3,16 @@ import ReactDOM from 'react-dom'
 import './popup.css'
 import logo from "./logo.jpg";
 import Button from 'react-bootstrap/Button';
+import isURL from 'validator/lib/isURL';
 
 
 
+
+// var validUrl = require('valid-url');
+// console.log('')
 const NameForm = () => {
+
+
   const [addressBar, setAddressBar] = useState('');
   const [page, setPage] = useState('main');
 
@@ -55,7 +61,7 @@ const NameForm = () => {
   }
 
 
-  function showErrorfn() {
+  function showErrorAddfn() {
     return (
       <p>
         Got an error in adding {addressBar}
@@ -87,6 +93,16 @@ const NameForm = () => {
     )
   }
 
+  function showErrorType() {
+    return (
+      <div>
+        <p>
+          {addressBar} address is not valid address
+        </p>
+      </div>
+    )
+  }
+
   useEffect(() => {
 
     showPage()
@@ -102,15 +118,21 @@ const NameForm = () => {
     chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
       let tmpurl = tabs[0].url;
       let tmp = new URL(tmpurl);
-      setAddressBar(tmp.hostname);
-      checkAddress(tmp.hostname, false);
+      if (isURL(tmp.hostname.toLowerCase())) {
+        setAddressBar(tmp.hostname.toLowerCase());
+        checkAddress(tmp.hostname.toLowerCase(), false);
+      }
     })
   }, []);
 
 
   function handleSubmit(event) {
     event.preventDefault();
-    checkAddress(addressBar, true)
+    if (isURL(addressBar)) {
+      checkAddress(addressBar, true)
+    } else {
+      setPage('errorType')
+    }
   }
 
 
@@ -158,7 +180,11 @@ const NameForm = () => {
 
     } else if (page === 'errorAdding') {
 
-      return showErrorfn()
+      return showErrorAddfn()
+
+    } else if (page === 'errorType') {
+
+      return showErrorType()
 
     } else {
       return (
@@ -195,7 +221,11 @@ const NameForm = () => {
   }
 
   function handleAddButtonEvent(command) {
-    addToDatabase(command);
+    if (isURL(addressBar)) {
+      addToDatabase(command);
+    } else {
+      setPage('errorType')
+    }
   };
 
   function mainpage() {
