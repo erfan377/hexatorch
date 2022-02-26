@@ -3,10 +3,11 @@ import { ButtonProps } from ".";
 
 const COLOR = {
   primary: css`
-    color: #fff;
-    background: linear-gradient(#423AFB, #423AFB);
+    color: #FFF;
+    background: linear-gradient(#38384F, #38384F);
     &:hover {
-      background: linear-gradient(#2421f9, #2421f9);
+      background: #B1B0B9;
+      color: #FFF;
     }
   `,
   secondary: css`

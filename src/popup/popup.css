@@ -9,7 +9,7 @@ body {
 }
 
 .header {
-  background-color: #423AFB;
+  background-color: #B1B0B9;
   color: #FFFFFF;
   height: 55px;
   width: 400px;
@@ -50,7 +50,7 @@ input {
   width: 300px;
   text-align: left;
   border: 10px;
-  border-color: #423AFB;
+  border-color: #B1B0B9;
   background-color: #EDE7E7;
   border-radius: 10px;
 }
