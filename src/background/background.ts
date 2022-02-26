@@ -105,7 +105,6 @@ async function checkURL(currelhost) {
   var localBlockedlist = await fetchLocal("blockedlist");
   var serverApprovedList = await fetchLocal("serverApprovedList");
   var serverBlockedList = await fetchLocal("serverBlockedList");
-  console.log('seeee', serverBlockedList)
 
   var results = {
     "inUserApprovedlist": false,
@@ -128,7 +127,6 @@ async function checkURL(currelhost) {
   if (serverBlockedList.includes(currelhost)) {
     results["inServerBlockedlist"] = true;
   }
-  console.log('ress', results, currelhost)
   return results;
 }
 
@@ -176,7 +174,6 @@ try {
     let safeUrl = await fetchServer('approved_links')
     chrome.storage.local.set({ "serverApprovedList": safeUrl });
     let blockedUrl = await fetchServer('malicious_links')
-    console.log('bad list', blockedUrl)
     chrome.storage.local.set({ "serverBlockedList": blockedUrl });
   }
   chrome.alarms.onAlarm.addListener(cacheServer)

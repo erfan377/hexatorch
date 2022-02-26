@@ -16,7 +16,7 @@ const NameForm = () => {
     responseJson = await response.json();
     let ethUsd = responseJson.result.ethusd
     let averagePrice = ethUsd * gasGwei / 1000000000 * 21000
-    averagePrice = parseFloat(averagePrice.toFixed(3))
+    averagePrice = parseFloat(averagePrice.toFixed(2))
     setGas({ gwei: gasGwei, usd: averagePrice })
   }
 
@@ -134,9 +134,8 @@ const NameForm = () => {
   }
 
   useEffect(() => {
-    getGas()
     showPage()
-  }, [addressBar, page]);
+  }, [addressBar, page, gas]);
 
 
 
