@@ -206,7 +206,6 @@ function checkRunResult(result) {
 }
 
 chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
-  console.log(tab.url);
   var tmpURL = new URL(tab.url);
   let url = tmpURL.hostname.toLowerCase()
   if (isURL(url)) {
@@ -230,7 +229,6 @@ chrome.tabs.onActivated.addListener(function (info) {
   chrome.tabs.get(info.tabId, function (tab) {
     var tmpURL = new URL(tab.url);
     let url = tmpURL.hostname.toLowerCase()
-    console.log('changing tab', url)
     if (isURL(url)) {
       run(url).then((result) => {
         checkRunResult(result)

@@ -6,10 +6,6 @@ import Button from 'react-bootstrap/Button';
 import isURL from 'validator/lib/isURL';
 
 
-
-
-// var validUrl = require('valid-url');
-// console.log('')
 const NameForm = () => {
 
   async function getGas() {
@@ -23,8 +19,6 @@ const NameForm = () => {
     averagePrice = parseFloat(averagePrice.toFixed(3))
     setGas({ gwei: gasGwei, usd: averagePrice })
   }
-
-
 
   const [addressBar, setAddressBar] = useState('');
   const [page, setPage] = useState('main');
