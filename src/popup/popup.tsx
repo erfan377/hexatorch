@@ -4,24 +4,11 @@ import './popup.css'
 import logo from "./logo.jpg";
 import Button from 'react-bootstrap/Button';
 
-// const Ps = {
-//   background-color: 'black',
-//   height: 1000,
-//   width: 1000,
-// }
 
 
 const NameForm = () => {
   const [addressBar, setAddressBar] = useState('');
-  const [showApproveBlocked, setShowApproveBlocked] = useState(false);
-  const [showApproveSafe, setShowApproveSafe] = useState(false);
-  const [showMainPage, setShowMainPage] = useState(true);
-  const [showErrorBlocked, setShowErrorBlocked] = useState(false);
-  const [showErrorSafe, setShowErrorSafe] = useState(false);
-  const [showSafe, setShowSafe] = useState(false);
-  const [showBad, setShowBad] = useState(false);
-  const [showNotFound, setShowNotFound] = useState(false);
-  const [submission, setSubmission] = useState(false);
+  const [page, setPage] = useState('main');
 
   function handleChange(event) {
     event.preventDefault();
@@ -29,192 +16,213 @@ const NameForm = () => {
   }
 
   function showNotFoundfn() {
-    if (showNotFound) {
-      return (
-        <p>
-          Nothing was found
-        </p>)
-    } else {
-      return (
-        <div>
-        </div>);
-    }
+    return (
+      <p>
+        Nothing was found
+      </p>
+    )
   }
 
-  function showApprovefn() {
-    if (showApproveSafe) {
-      return (
+  function showRemovedfn() {
+    return (
+      <p>
+        {addressBar} was removed from your list
+      </p>
+    )
+  }
+
+
+  function showApproveBlockedfn() {
+    return (
+      <div>
+        <p>
+          Approved blocked added {addressBar}
+        </p>
+        <Button onClick={handleRemoveButtonEvent}> Remove from blocked</Button>
+      </div>
+    )
+  }
+
+  function showApproveSafefn() {
+    return (
+      <div>
         <p>
           Approved Safe added {addressBar}
-        </p>)
-    } else if (showApproveBlocked) {
-      return (
-        <p>
-          Approved Blocked added {addressBar}
-        </p>)
-    } else {
-      return (
-        <div>
-        </div>);
-    }
-  };
-
+        </p>
+        <Button onClick={handleRemoveButtonEvent}> Remove from SafeList</Button>
+      </div>
+    )
+  }
 
 
   function showErrorfn() {
-    if (showErrorSafe) {
-      return (
-        <p>
-          Got an error in adding {addressBar} exists in safe list
-        </p>)
-    } else if (showErrorBlocked) {
-      return (
-        <p>
-          Got an error in adding {addressBar} exists in blocked list
-        </p>)
-    } else {
-      return (
-        <div>
-        </div>);
-    }
-  };
+    return (
+      <p>
+        Got an error in adding {addressBar}
+      </p>
+    )
+  }
 
-  function showState() {
-
-    if (showSafe) {
-      return (
-        <div className='safePage'>
-          <p>
-            {addressBar} address is safe
-          </p>
-
-          <Button onClick={handleButtonRemove}> Remove from SafeList</Button>
-        </div>
-      )
-    } else if (showBad) {
-      return (
+  function showBlockedState() {
+    return (
+      <div className='BlockedPage'>
         <p>
           {addressBar} address is bad
-        </p>)
-    } else {
-      return (
-        <div>
-        </div>);
+        </p>
+
+        <Button onClick={handleRemoveButtonEvent}> Remove from BlockedList</Button>
+      </div>
+    )
+  }
+
+  function showSafeState() {
+    return (
+      <div className='SafePage'>
+        <p>
+          {addressBar} address is safe
+        </p>
+
+        <Button onClick={handleRemoveButtonEvent}> Remove from SafeList</Button>
+      </div>
+    )
+  }
+
+  useEffect(() => {
+
+    showPage()
+  }, [addressBar, page]);
+
+
+
+  useEffect(() => {
+    if (page === 'removed' || page === 'notFound') {
+      setPage('main')
     }
-  };
 
-
-  useEffect(() => {
-  }, [showApproveSafe,
-    showApproveBlocked,
-    showMainPage,
-    showErrorSafe,
-    showErrorBlocked,
-    showBad,
-    showSafe,
-    showNotFound,
-    addressBar]);
-
-
-  useEffect(() => {
-    setSubmission(false);
     chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
       let tmpurl = tabs[0].url;
       let tmp = new URL(tmpurl);
       setAddressBar(tmp.hostname);
-      checkAddress(tmp.hostname);
+      checkAddress(tmp.hostname, false);
     })
   }, []);
 
 
   function handleSubmit(event) {
-    setSubmission(true);
     event.preventDefault();
-    checkAddress(addressBar);
+    checkAddress(addressBar, true)
   }
 
 
 
-  function checkAddress(address) {
+  function checkAddress(address, submission) {
     chrome.runtime.sendMessage({ command: { type: 'checkAddress', value: address } }, response => {
       if (response === 'safe') {
-        setShowSafe(true);
-        setShowMainPage(false);
-        return true
+        setPage('safe')
       } else if (response === 'blocked') {
-        setShowBad(true);
-        setShowMainPage(false);
-        return true
-      } else {
-        setShowMainPage(true);
-        return false
+        setPage('blocked')
+      } else if (response === 'notFound' && submission == true) {
+        setPage('notFound')
       }
-    }
-    )
+    })
   };
+
+
+  function showPage() {
+    if (page === 'main') {
+
+      return mainpage()
+
+    } else if (page === 'addedSafe') {
+
+      return showApproveSafefn()
+    } else if (page === 'addedBlocked') {
+
+      return showApproveBlockedfn()
+
+    } else if (page === 'blocked') {
+
+      return showBlockedState()
+
+    } else if (page === 'safe') {
+
+      return showSafeState()
+
+    } else if (page === 'removed') {
+
+      return showRemovedfn()
+
+    } else if (page === 'notFound') {
+
+      return showNotFoundfn()
+
+    } else if (page === 'errorAdding') {
+
+      return showErrorfn()
+
+    } else {
+      return (
+        <div>
+        </div>
+      )
+    }
+  }
+
 
 
   const addToDatabase = (action) => {
     chrome.runtime.sendMessage({ command: { type: action, value: addressBar } }, response => {
-      console.log('pop: response', response)
-      if (response === 'existsSafe') {
-        setShowErrorSafe(true);
-        setShowMainPage(false);
-      } else if (response === 'existsBlocked') {
-        setShowErrorBlocked(true);
-        setShowMainPage(false);
+      if (response === 'existsSafe' || response === 'existsBlocked') {
+        setPage('errorAdding')
       } else if (response === 'addedSafe') {
-        setShowApproveSafe(true);
-        setShowMainPage(false);
+        setPage('addedSafe')
       } else if (response === 'addedBlocked') {
-        console.log('pop: im bad')
-        setShowApproveBlocked(true);
-        setShowMainPage(false);
+        setPage('addedBlocked')
       }
     })
   }
 
 
-  const handleButtonRemove = () => {
-
+  const handleRemoveButtonEvent = () => {
+    chrome.runtime.sendMessage({ command: { type: 'removeAddress', value: addressBar } }, response => {
+      console.log('response remove', response)
+      if (response === 'removedSafe' || response === 'removedBlocked') {
+        console.log('yesss removed', response)
+        setPage('removed')
+        return true
+      }
+    })
   }
 
-  function handleButtonEvent(command) {
+  function handleAddButtonEvent(command) {
     addToDatabase(command);
   };
 
   function mainpage() {
-    if (showMainPage) {
-      return (
-        <form onSubmit={handleSubmit}>
-          <label>
-            <input
-              type="text"
-              placeholder="Type an address and press enter..."
-              value={addressBar}
-              onChange={e => handleChange(e)}
-              style={{
-                padding: "10px 20px",
-                width: "300px",
-                textAlign: "left",
-                border: "0px",
-                marginLeft: "25px",
-                backgroundColor: '#EDE7E7',
-                borderRadius: '10px',
-              }}
-            />
-          </label>
-          <img className='logo' src={logo} />
-          <Button onClick={() => handleButtonEvent('addToSafeList')}> Add to Safe List</Button>
-          <Button onClick={() => handleButtonEvent('addToBlockedList')}> Add to Block List</Button>
-        </form>
-      );
-
-    } else {
-      return (
-        <div>
-        </div>);
-    }
+    return (
+      <form onSubmit={handleSubmit}>
+        <label>
+          <input
+            type="text"
+            placeholder="Type an address and press enter..."
+            value={addressBar}
+            onChange={e => handleChange(e)}
+            style={{
+              padding: "10px 20px",
+              width: "300px",
+              textAlign: "left",
+              border: "0px",
+              marginLeft: "25px",
+              backgroundColor: '#EDE7E7',
+              borderRadius: '10px',
+            }}
+          />
+        </label>
+        <img className='logo' src={logo} />
+        <Button onClick={() => handleAddButtonEvent('addToSafeList')}> Add to Safe List</Button>
+        <Button onClick={() => handleAddButtonEvent('addToBlockedList')}> Add to Block List</Button>
+      </form>
+    )
   }
 
   return (
@@ -225,13 +233,7 @@ const NameForm = () => {
         <text className='gasprice'>  73 Gwei, $3.84 USD </text>
       </div>
       <div className='mainPage'>
-        {mainpage()}
-      </div>
-      <div id='nextPages'>
-        {showApprovefn()}
-        {showErrorfn()}
-        {showNotFoundfn()}
-        {showState()}
+        {showPage()}
       </div>
     </div>
   );

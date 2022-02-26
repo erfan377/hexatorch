@@ -57,9 +57,28 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       sendResponse(result)
     });
     return true
+  } else if (msg.command.type === "removeAddress") {
+    removeURL(msg.command.value).then((result) => {
+      sendResponse(result)
+    })
+    return true
   }
 });
 
+async function removeURL(url) {
+  var localApprovedlist = await fetchLocal("approvedlist");
+  var localBlockedlist = await fetchLocal("blockedlist");
+  if (localApprovedlist.includes(url)) {
+    localApprovedlist = localApprovedlist.filter(item => item !== url)
+    chrome.storage.local.set({ "approvedlist": localApprovedlist });
+    return 'removedSafe'
+  } if (localBlockedlist.includes(url)) {
+    localBlockedlist = localBlockedlist.filter(item => item !== url)
+    chrome.storage.local.set({ "blockedlist": localBlockedlist });
+    return 'removedBlocked'
+
+  }
+}
 
 //TODO: make this intro a if statement for response
 async function addURL(newURL, listtype) {
@@ -130,7 +149,7 @@ async function run(currentHost: string) {
     return 'blocked';
   } else {
     //didn't find it
-    return 'not found';
+    return 'notFound';
   }
 }
 
