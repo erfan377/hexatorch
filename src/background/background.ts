@@ -115,16 +115,11 @@ async function checkURL(currelhost) {
 
   if (localApprovedlist.includes(currelhost)) {
     results["inUserApprovedlist"] = true;
-  }
-
-  if (localBlockedlist.includes(currelhost)) {
+  } else if (localBlockedlist.includes(currelhost)) {
     results["inUserBlockedlist"] = true;
-  }
-  if (serverApprovedList.includes(currelhost)) {
+  } else if (serverApprovedList.includes(currelhost)) {
     results["inServerApprovedlist"] = true;
-  }
-
-  if (serverBlockedList.includes(currelhost)) {
+  } else if (serverBlockedList.includes(currelhost)) {
     results["inServerBlockedlist"] = true;
   }
   return results;
@@ -188,7 +183,6 @@ function checkRunResult(result) {
     chrome.action.setBadgeText({ text: 'SAFE' });
     chrome.action.setBadgeBackgroundColor({ color: '#00FF00' });
   } else if (result === 'blockedLocal' || result === 'blockedServer') {
-
     // NOTIFICATION
     // chrome.notifications.create(
     //   'reminder', {
@@ -198,7 +192,6 @@ function checkRunResult(result) {
     //   message: 'You have ' + ' things to do. Wake up, dude!',
     //   priority: 2
     // })
-
     chrome.action.setBadgeText({ text: 'BAD' });
     chrome.action.setBadgeBackgroundColor({ color: '#FF0000' });
   } else if (result === 'notFound') {
@@ -213,6 +206,8 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
     run(url).then((result) => {
       checkRunResult(result)
     })
+  } else {
+    chrome.action.setBadgeText({ text: '' });
   }
 });
 
@@ -224,6 +219,8 @@ chrome.tabs.onActivated.addListener(function (info) {
       run(url).then((result) => {
         checkRunResult(result)
       })
+    } else {
+      chrome.action.setBadgeText({ text: '' });
     }
   });
 });
