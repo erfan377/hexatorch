@@ -81,10 +81,9 @@ const NameForm = () => {
     return (
       <div className='BlockedPage'>
         <p>
-          {addressBar} address is bad
+          {addressBar} address is bad on server
         </p>
 
-        <Button onClick={handleRemoveButtonEvent}> Remove from BlockedList</Button>
       </div>
     )
   }
@@ -93,7 +92,7 @@ const NameForm = () => {
     return (
       <div className='BlockedPage'>
         <p>
-          {addressBar} address is bad
+          {addressBar} address is bad locally
         </p>
 
         <Button onClick={handleRemoveButtonEvent}> Remove from BlockedList</Button>
@@ -105,10 +104,9 @@ const NameForm = () => {
     return (
       <div className='SafePage'>
         <p>
-          {addressBar} address is safe
+          {addressBar} address is safe on server
         </p>
 
-        <Button onClick={handleRemoveButtonEvent}> Remove from SafeList</Button>
       </div>
     )
   }
@@ -117,7 +115,7 @@ const NameForm = () => {
     return (
       <div className='SafePage'>
         <p>
-          {addressBar} address is safe
+          {addressBar} address is safe locally
         </p>
 
         <Button onClick={handleRemoveButtonEvent}> Remove from SafeList</Button>
@@ -237,8 +235,6 @@ const NameForm = () => {
       )
     }
   }
-
-
 
   const addToDatabase = (action, address) => {
     chrome.runtime.sendMessage({ command: { type: action, value: address } }, response => {

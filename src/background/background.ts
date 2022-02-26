@@ -105,6 +105,7 @@ async function checkURL(currelhost) {
   var localBlockedlist = await fetchLocal("blockedlist");
   var serverApprovedList = await fetchLocal("serverApprovedList");
   var serverBlockedList = await fetchLocal("serverBlockedList");
+  console.log('seeee', serverBlockedList)
 
   var results = {
     "inUserApprovedlist": false,
@@ -121,23 +122,24 @@ async function checkURL(currelhost) {
     results["inUserBlockedlist"] = true;
   }
   if (serverApprovedList.includes(currelhost)) {
-    results["inServerBlockedlist"] = true;
+    results["inServerApprovedlist"] = true;
   }
 
   if (serverBlockedList.includes(currelhost)) {
-    results["inServerApprovedlist"] = true;
+    results["inServerBlockedlist"] = true;
   }
+  console.log('ress', results, currelhost)
   return results;
 }
 
 async function run(currentHost: string) {
   let results = await checkURL(currentHost);
-  if (results["inUserApprovedlist"] || results["inServerBlockedlist"]) {
+  if (results["inUserApprovedlist"]) {
     //it's in the approved list
     return 'safeLocal';
-  } else if (results["inServerBlockedlist"]) {
+  } else if (results["inServerApprovedlist"]) {
     return 'safeServer';
-  } else if (results["inUserBlockedlist"] || results["inServerBlockedlist"]) {
+  } else if (results["inUserBlockedlist"]) {
     //it's in the blocked list
     return 'blockedLocal';
   } else if (results["inServerBlockedlist"]) {
@@ -174,7 +176,8 @@ try {
     let safeUrl = await fetchServer('approved_links')
     chrome.storage.local.set({ "serverApprovedList": safeUrl });
     let blockedUrl = await fetchServer('malicious_links')
-    chrome.storage.local.set({ "serverBlockedlist": blockedUrl });
+    console.log('bad list', blockedUrl)
+    chrome.storage.local.set({ "serverBlockedList": blockedUrl });
   }
   chrome.alarms.onAlarm.addListener(cacheServer)
 
@@ -189,14 +192,15 @@ function checkRunResult(result) {
     chrome.action.setBadgeBackgroundColor({ color: '#00FF00' });
   } else if (result === 'blockedLocal' || result === 'blockedServer') {
 
-    chrome.notifications.create(
-      'reminder', {
-      type: 'basic',
-      title: 'Don\'t forget!',
-      iconUrl: "static/icon.png",
-      message: 'You have ' + ' things to do. Wake up, dude!',
-      priority: 2
-    })
+    // NOTIFICATION
+    // chrome.notifications.create(
+    //   'reminder', {
+    //   type: 'basic',
+    //   title: 'Don\'t forget!',
+    //   iconUrl: "static/icon.png",
+    //   message: 'You have ' + ' things to do. Wake up, dude!',
+    //   priority: 2
+    // })
 
     chrome.action.setBadgeText({ text: 'BAD' });
     chrome.action.setBadgeBackgroundColor({ color: '#FF0000' });
@@ -216,16 +220,6 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
 });
 
 chrome.tabs.onActivated.addListener(function (info) {
-  // chrome.notifications.create(
-  //   'reminder', {
-  //   type: 'basic',
-  //   title: 'Don\'t forget!',
-  //   iconUrl: "http://www.google.com/favicon.ico",
-  //   message: 'You have things to do. Wake up, dude!',
-  //   priority: 2
-  // }, function (id) { console.log("Last error:", chrome.runtime.lastError); })
-
-
   chrome.tabs.get(info.tabId, function (tab) {
     var tmpURL = new URL(tab.url);
     let url = tmpURL.hostname.toLowerCase()
