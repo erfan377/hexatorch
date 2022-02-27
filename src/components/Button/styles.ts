@@ -11,10 +11,13 @@ const COLOR = {
     }
   `,
   secondary: css`
-    color: #fff;
-    background: linear-gradient(#C61434, #C61434);
+    color: #38384F;
+    background: #FFF;
+    border-color: #38384F;
+    border: 1px solid #38384F;
     &:hover {
-      background: linear-gradient(#DC143C, #DC143C);
+      background: #B1B0B9;
+      color: #38384F;
     }
   `,
 };

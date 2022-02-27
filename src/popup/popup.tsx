@@ -299,11 +299,6 @@ const NameForm = () => {
     }
   };
 
-  const ClickMe = () => {
-    console.log("Button Clicked");
-    handleAddButtonEvent('addToSafeList')
-  };
-
   function mainpage() {
     return (
       <div>
@@ -317,7 +312,6 @@ const NameForm = () => {
            />
          </div>
          </form>
-         <img className='logo' src={logo} />
          <div className="content">
          <Button onClick={() => handleAddButtonEvent('addToSafeList')} color="primary"> Add to Safelist</Button>
          <Button onClick={() => handleAddButtonEvent('addToBlockedList')} color="secondary"> Add to Blocklist</Button>
@@ -333,6 +327,7 @@ const NameForm = () => {
         <br />
         <text className='gasprice'>  {gas.gwei} Gwei, ${gas.usd} USD </text>
       </div>
+      <img className='logo' src={logo} />
       <div className='mainPage'>
         {showPage()}
       </div>
