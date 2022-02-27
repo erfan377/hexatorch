@@ -1,6 +1,7 @@
 // // TODO: background script
 import { initializeApp } from "firebase/app";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
+import { getAnalytics, logEvent } from "firebase/analytics";
 import isURL from 'validator/lib/isURL';
 
 chrome.runtime.onInstalled.addListener(() => {
@@ -178,20 +179,20 @@ try {
 }
 
 
-function checkRunResult(result) {
+function checkRunResult(result, url) {
   if (result === 'safeLocal' || result === 'safeServer') {
     chrome.action.setBadgeText({ text: 'SAFE' });
     chrome.action.setBadgeBackgroundColor({ color: '#00FF00' });
   } else if (result === 'blockedLocal' || result === 'blockedServer') {
-    // NOTIFICATION
-    // chrome.notifications.create(
-    //   'reminder', {
-    //   type: 'basic',
-    //   title: 'Don\'t forget!',
-    //   iconUrl: "static/icon.png",
-    //   message: 'You have ' + ' things to do. Wake up, dude!',
-    //   priority: 2
-    // })
+
+    chrome.notifications.create({
+      type: 'basic',
+      title: 'Malicious Website',
+      iconUrl: "./icon-128.png",
+      message: `${url} is a malicious website in the database`,
+      priority: 2
+    })
+
     chrome.action.setBadgeText({ text: 'BAD' });
     chrome.action.setBadgeBackgroundColor({ color: '#FF0000' });
   } else if (result === 'notFound') {
@@ -204,7 +205,7 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
     var tmpURL = new URL(tab.url);
     let url = tmpURL.hostname.toLowerCase()
     run(url).then((result) => {
-      checkRunResult(result)
+      checkRunResult(result, url)
     })
   } else {
     chrome.action.setBadgeText({ text: '' });
@@ -217,7 +218,7 @@ chrome.tabs.onActivated.addListener(function (info) {
       var tmpURL = new URL(tab.url);
       let url = tmpURL.hostname.toLowerCase()
       run(url).then((result) => {
-        checkRunResult(result)
+        checkRunResult(result, url)
       })
     } else {
       chrome.action.setBadgeText({ text: '' });
