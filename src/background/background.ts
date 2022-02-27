@@ -5,6 +5,7 @@ import isURL from 'validator/lib/isURL';
 
 chrome.runtime.onInstalled.addListener(() => {
   chrome.alarms.create('fetchServer', { when: Date.now(), periodInMinutes: 30 })
+
 })
 
 const getObjectFromLocalStorage = async function (key) {
@@ -115,35 +116,27 @@ async function checkURL(currelhost) {
 
   if (localApprovedlist.includes(currelhost)) {
     results["inUserApprovedlist"] = true;
-  }
-
-  if (localBlockedlist.includes(currelhost)) {
+  } else if (localBlockedlist.includes(currelhost)) {
     results["inUserBlockedlist"] = true;
-  }
-  if (serverApprovedList.includes(currelhost)) {
-    results["inServerBlockedlist"] = true;
-  }
-
-  if (serverBlockedList.includes(currelhost)) {
+  } else if (serverApprovedList.includes(currelhost)) {
     results["inServerApprovedlist"] = true;
+  } else if (serverBlockedList.includes(currelhost)) {
+    results["inServerBlockedlist"] = true;
   }
   return results;
 }
 
 async function run(currentHost: string) {
   let results = await checkURL(currentHost);
-  if (results["inUserApprovedlist"] || results["inServerBlockedlist"]) {
-    //it's in the approved list
+  if (results["inUserApprovedlist"]) {
     return 'safeLocal';
-  } else if (results["inServerBlockedlist"]) {
+  } else if (results["inServerApprovedlist"]) {
     return 'safeServer';
-  } else if (results["inUserBlockedlist"] || results["inServerBlockedlist"]) {
-    //it's in the blocked list
+  } else if (results["inUserBlockedlist"]) {
     return 'blockedLocal';
   } else if (results["inServerBlockedlist"]) {
     return 'blockedServer';
   } else {
-    //didn't find it
     return 'notFound';
   }
 }
@@ -158,45 +151,37 @@ const firebaseConfig = {
   measurementId: process.env.FIREBASE_measurementId
 };
 
-try {
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore();
-  async function fetchServer(list) {
-    const querySnapshot = await getDocs(collection(db, list));
-    let urlList = [];
-    querySnapshot.forEach((doc) => {
-      urlList.push(doc.data().URL)
-    })
-    return urlList
-  }
-  async function cacheServer() {
-    let safeUrl = await fetchServer('approved_links')
-    chrome.storage.local.set({ "serverApprovedList": safeUrl });
-    let blockedUrl = await fetchServer('malicious_links')
-    chrome.storage.local.set({ "serverBlockedlist": blockedUrl });
-  }
-  chrome.alarms.onAlarm.addListener(cacheServer)
-
-} catch (ex) {
-  console.log('Trouble launching firebase', ex)
+const app = initializeApp(firebaseConfig);
+const db = getFirestore();
+async function fetchServer(list) {
+  const querySnapshot = await getDocs(collection(db, list));
+  let urlList = [];
+  querySnapshot.forEach((doc) => {
+    urlList.push(doc.data().URL)
+  })
+  return urlList
+}
+async function cacheServer() {
+  let safeUrl = await fetchServer('approved_links')
+  chrome.storage.local.set({ "serverApprovedList": safeUrl });
+  let blockedUrl = await fetchServer('malicious_links')
+  chrome.storage.local.set({ "serverBlockedList": blockedUrl });
 }
 
+chrome.alarms.onAlarm.addListener(cacheServer)
 
-function checkRunResult(result) {
+function checkRunResult(result, url) {
   if (result === 'safeLocal' || result === 'safeServer') {
     chrome.action.setBadgeText({ text: 'SAFE' });
     chrome.action.setBadgeBackgroundColor({ color: '#00FF00' });
   } else if (result === 'blockedLocal' || result === 'blockedServer') {
-
-    chrome.notifications.create(
-      'reminder', {
+    chrome.notifications.create({
       type: 'basic',
-      title: 'Don\'t forget!',
-      iconUrl: "static/icon.png",
-      message: 'You have ' + ' things to do. Wake up, dude!',
+      title: 'Malicious Website',
+      iconUrl: "./icon-128.png",
+      message: `${url} is a malicious website in the database`,
       priority: 2
     })
-
     chrome.action.setBadgeText({ text: 'BAD' });
     chrome.action.setBadgeBackgroundColor({ color: '#FF0000' });
   } else if (result === 'notFound') {
@@ -205,33 +190,27 @@ function checkRunResult(result) {
 }
 
 chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
-  var tmpURL = new URL(tab.url);
-  let url = tmpURL.hostname.toLowerCase()
-  if (isURL(url)) {
+  if (isURL(tab.url)) {
+    var tmpURL = new URL(tab.url);
+    let url = tmpURL.hostname.toLowerCase()
     run(url).then((result) => {
-      checkRunResult(result)
+      checkRunResult(result, url)
     })
+  } else {
+    chrome.action.setBadgeText({ text: '' });
   }
 });
 
 chrome.tabs.onActivated.addListener(function (info) {
-  // chrome.notifications.create(
-  //   'reminder', {
-  //   type: 'basic',
-  //   title: 'Don\'t forget!',
-  //   iconUrl: "http://www.google.com/favicon.ico",
-  //   message: 'You have things to do. Wake up, dude!',
-  //   priority: 2
-  // }, function (id) { console.log("Last error:", chrome.runtime.lastError); })
-
-
   chrome.tabs.get(info.tabId, function (tab) {
-    var tmpURL = new URL(tab.url);
-    let url = tmpURL.hostname.toLowerCase()
-    if (isURL(url)) {
+    if (isURL(tab.url)) {
+      var tmpURL = new URL(tab.url);
+      let url = tmpURL.hostname.toLowerCase()
       run(url).then((result) => {
-        checkRunResult(result)
+        checkRunResult(result, url)
       })
+    } else {
+      chrome.action.setBadgeText({ text: '' });
     }
   });
 });
