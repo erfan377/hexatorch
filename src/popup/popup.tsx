@@ -2,9 +2,9 @@ import React, { Component, useEffect, useState } from 'react'
 import ReactDOM from 'react-dom'
 import './popup.css'
 import logo from "./logo.jpg";
-import Button from 'react-bootstrap/Button';
+// import Button from 'react-bootstrap/Button';
 // import 'bootstrap/dist/css/bootstrap.min.css';
-// import { Button } from "../components/Button";
+import { Button } from "../components/Button";
 import isURL from 'validator/lib/isURL';
 
 const NameForm = () => {
@@ -314,9 +314,9 @@ const NameForm = () => {
         </div>
         <img className='logo' src={logo} />
         <div className="content">
-          <Button onClick={() => handleAddButtonEvent('addToSafeList')}> Add to Safelist</Button>
-          <Button onClick={() => handleAddButtonEvent('addToBlockedList')}> Add to Blocklist</Button>
         </div>
+        <Button onClick={() => handleAddButtonEvent('addToSafeList')} color="primary"> Add to Safelist</Button>
+        <Button onClick={() => handleAddButtonEvent('addToBlockedList')} color="secondary"> Add to Blocklist</Button>
       </form>
     )
   }
