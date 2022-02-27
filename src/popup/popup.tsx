@@ -30,52 +30,47 @@ const NameForm = () => {
 
   function showNotFoundfn() {
     return (
+      <div className='content'>
       <div className='confirmationPage'>
-        <p>
-          Nothing was found
-        </p>
+        <h3 className='explanationNeutral'>Nothing was found</h3>
+      </div>
       </div>
     )
   }
 
   function showRemovedfn() {
     return (
+      <div className='content'>
       <div className='confirmationPage'>
-        <p className='address'>
-          {addressBar}
-        </p>
-        <p className='explanation'>
-          was removed from your list
-        </p>
+        <h3 className='address'>{addressBar}</h3>
+        <h3 className='explanationNeutral'>Was just removed</h3>
+      </div>
       </div>
     )
   }
 
-
   function showApproveBlockedfn() {
     return (
+      <div className='content'>
       <div className='confirmationPage'>
-        <p className='address'>
-          {addressBar}
-        </p>
-        <p className='explanation'>
-          Approved blocked added
-        </p>
-        <Button onClick={handleRemoveButtonEvent}> Remove from blocked</Button>
+        <p className='address'>{addressBar} </p>
+        <h3 className='explanationNeutral'>Added to your blocklist</h3>
+        <p></p>
+        <Button onClick={handleRemoveButtonEvent}>Remove from blocked</Button>
+      </div>
       </div>
     )
   }
 
   function showApproveSafefn() {
     return (
+      <div className='content'>
       <div className='confirmationPage'>
-        <p className='address'>
-          {addressBar}
-        </p>
-        <p className='explanation'>
-          Approved Safe added
-        </p>
-        <Button onClick={handleRemoveButtonEvent}> Remove from SafeList</Button>
+        <h3 className='address'>{addressBar}</h3>
+        <h3 className='explanationGreen'>Added to your safelist!</h3>
+        <p></p>
+        <Button onClick={handleRemoveButtonEvent}>Remove from SafeList</Button>
+      </div>
       </div>
     )
   }
@@ -83,84 +78,73 @@ const NameForm = () => {
 
   function showErrorAddfn() {
     return (
+      <div className='content'>
       <div className='confirmationPage'>
-
-        <p className='address'>
-          {addressBar}
-        </p>
-        <p className='explanation'>
-          Got an error in adding
-        </p>
+        <h3 className='address'>{addressBar}</h3>
+        <h3 className='explanationRed'>Error while adding. Please try again.</h3>
+      </div>
       </div>
     )
   }
 
   function showBlockedStateServer() {
     return (
+      <div className='content'>
       <div className='confirmationPage'>
-        <p className='address'>
-          {addressBar}
-        </p>
-        <p className='explanation'>
-          address is bad on server
-        </p>
-        <Button onClick={() => handleAddButtonEvent('addToSafeList')}> Add to Safe List</Button>
+        <h3 className='address'>{addressBar}</h3>
+        <h3 className='explanationRed'>Address is on our blocklist.</h3>
+        <h3 className='explanationRed'>Proceed at your own risk.</h3>
+      </div>
       </div>
     )
   }
 
   function showBlockedStateLocal() {
     return (
+      <div className='content'>
       <div className='confirmationPage'>
-        <p className='address'>
-          {addressBar}
-        </p>
-        <p className='explanation'>
-          address is bad locally
-        </p>
-        <Button onClick={handleRemoveButtonEvent}> Remove from BlockedList</Button>
+        <h3 className='address'>{addressBar}</h3>
+        <h3 className='explanationRed'>This is on your blocklist</h3>
+        <p></p>
+        <Button onClick={handleRemoveButtonEvent}> Remove from Blocklist</Button>
+      </div>
       </div>
     )
   }
 
   function showSafeStateServer() {
     return (
+      <div className='content'>
       <div className='confirmationPage'>
-        <p className='address'>
-          {addressBar}
-        </p>
-        <p className='explanation'>
-          address is safe on server
-        </p>
-
-        <Button onClick={() => handleAddButtonEvent('addToBlockedList')}> Add to Block List</Button>
+        <h3 className='address'>{addressBar}</h3>
+        <h3 className='explanationGreen'>Address is on our safelist!</h3>
+        <p></p>
+        <Button onClick={() => handleAddButtonEvent('addToBlockedList')}>Add to blocklist</Button>
+      </div>
       </div>
     )
   }
 
   function showSafeStateLocal() {
     return (
+      <div className='content'>
       <div className='confirmationPage'>
-        <p className='address'>
-          {addressBar}
-        </p>
-        <p className='explanation'>
-          address is safe locally
-        </p>
-        <Button onClick={handleRemoveButtonEvent}> Remove from SafeList</Button>
+        <h3 className='address'>{addressBar}</h3>
+        <h3 className='explanationGreen'>This is on your safelist!</h3>
+        <p></p>
+        <Button onClick={handleRemoveButtonEvent}>Remove from Safelist</Button>
+      </div>
       </div>
     )
   }
 
   function showErrorType() {
     return (
+      <div className='content'>
       <div className='confirmationPage'>
-        <p className='address'>
-          {addressBar}
-        </p>
-        <p className='explanation'>
-          address is not valid address
-        </p>
+        <h3 className='address'>{addressBar}</h3>
+        <h3 className='explanationRed'>Not valid address</h3>
+      </div>
       </div>
     )
   }
