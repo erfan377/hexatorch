@@ -68,7 +68,25 @@ input:focus{
 }
 
 .confirmationPage {
-  display: flex;
-  align-items: center;
+  display: inline-block;
+  vertical-align: middle;
+}
 
+.explanationGreen {
+  color: green !important;
+  text-align: center;
+}
+
+.address {
+  text-align: center;
+}
+
+.explanationRed {
+  color: red !important;
+  text-align: center;
+}
+
+.explanationNeutral {
+  color: #6d747d !important;
+  text-align: center;
 }
