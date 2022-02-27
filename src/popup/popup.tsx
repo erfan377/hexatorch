@@ -3,7 +3,8 @@ import ReactDOM from 'react-dom'
 import './popup.css'
 import logo from "./logo.jpg";
 import Button from 'react-bootstrap/Button';
-
+// import 'bootstrap/dist/css/bootstrap.min.css';
+// import { Button } from "../components/Button";
 import isURL from 'validator/lib/isURL';
 
 const NameForm = () => {
@@ -31,26 +32,36 @@ const NameForm = () => {
 
   function showNotFoundfn() {
     return (
-      <p>
-        Nothing was found
-      </p>
+      <div className='confirmationPage'>
+        <p>
+          Nothing was found
+        </p>
+      </div>
     )
   }
 
   function showRemovedfn() {
     return (
-      <p>
-        {addressBar} was removed from your list
-      </p>
+      <div className='confirmationPage'>
+        <p className='address'>
+          {addressBar}
+        </p>
+        <p className='explanation'>
+          was removed from your list
+        </p>
+      </div>
     )
   }
 
 
   function showApproveBlockedfn() {
     return (
-      <div>
-        <p>
-          Approved blocked added {addressBar}
+      <div className='confirmationPage'>
+        <p className='address'>
+          {addressBar}
+        </p>
+        <p className='explanation'>
+          Approved blocked added
         </p>
         <Button onClick={handleRemoveButtonEvent}> Remove from blocked</Button>
       </div>
@@ -59,9 +70,12 @@ const NameForm = () => {
 
   function showApproveSafefn() {
     return (
-      <div>
-        <p>
-          Approved Safe added {addressBar}
+      <div className='confirmationPage'>
+        <p className='address'>
+          {addressBar}
+        </p>
+        <p className='explanation'>
+          Approved Safe added
         </p>
         <Button onClick={handleRemoveButtonEvent}> Remove from SafeList</Button>
       </div>
@@ -71,17 +85,26 @@ const NameForm = () => {
 
   function showErrorAddfn() {
     return (
-      <p>
-        Got an error in adding {addressBar}
-      </p>
+      <div className='confirmationPage'>
+
+        <p className='address'>
+          {addressBar}
+        </p>
+        <p className='explanation'>
+          Got an error in adding
+        </p>
+      </div>
     )
   }
 
   function showBlockedStateServer() {
     return (
-      <div className='BlockedPage'>
-        <p>
-          {addressBar} address is bad on server
+      <div className='confirmationPage'>
+        <p className='address'>
+          {addressBar}
+        </p>
+        <p className='explanation'>
+          address is bad on server
         </p>
         <Button onClick={() => handleAddButtonEvent('addToSafeList')}> Add to Safe List</Button>
       </div>
@@ -90,9 +113,12 @@ const NameForm = () => {
 
   function showBlockedStateLocal() {
     return (
-      <div className='BlockedPage'>
-        <p>
-          {addressBar} address is bad locally
+      <div className='confirmationPage'>
+        <p className='address'>
+          {addressBar}
+        </p>
+        <p className='explanation'>
+          address is bad locally
         </p>
         <Button onClick={handleRemoveButtonEvent}> Remove from BlockedList</Button>
       </div>
@@ -101,10 +127,14 @@ const NameForm = () => {
 
   function showSafeStateServer() {
     return (
-      <div className='SafePage'>
-        <p>
-          {addressBar} address is safe on server
+      <div className='confirmationPage'>
+        <p className='address'>
+          {addressBar}
         </p>
+        <p className='explanation'>
+          address is safe on server
+        </p>
+
         <Button onClick={() => handleAddButtonEvent('addToBlockedList')}> Add to Block List</Button>
       </div>
     )
@@ -112,11 +142,13 @@ const NameForm = () => {
 
   function showSafeStateLocal() {
     return (
-      <div className='SafePage'>
-        <p>
-          {addressBar} address is safe locally
+      <div className='confirmationPage'>
+        <p className='address'>
+          {addressBar}
         </p>
-
+        <p className='explanation'>
+          address is safe locally
+        </p>
         <Button onClick={handleRemoveButtonEvent}> Remove from SafeList</Button>
       </div>
     )
@@ -124,9 +156,12 @@ const NameForm = () => {
 
   function showErrorType() {
     return (
-      <div>
-        <p>
-          {addressBar} address is not valid address
+      <div className='confirmationPage'>
+        <p className='address'>
+          {addressBar}
+        </p>
+        <p className='explanation'>
+          address is not valid address
         </p>
       </div>
     )
@@ -168,6 +203,7 @@ const NameForm = () => {
 
   function checkAddress(address, submission) {
     chrome.runtime.sendMessage({ command: { type: 'checkAddress', value: address } }, response => {
+      console.log('backend,', response)
       if (response === 'safeLocal') {
         setPage('safeLocal')
       } else if (response === 'safeServer') {
@@ -274,20 +310,13 @@ const NameForm = () => {
             placeholder="Type an address and press enter..."
             value={addressBar}
             onChange={e => handleChange(e)}
-            style={{
-              padding: "10px 20px",
-              width: "300px",
-              textAlign: "left",
-              border: "0px",
-              marginLeft: "25px",
-              backgroundColor: '#EDE7E7',
-              borderRadius: '10px',
-            }}
           />
         </div>
         <img className='logo' src={logo} />
-        <Button onClick={() => handleAddButtonEvent('addToSafeList')}> Add to Safe List</Button>
-        <Button onClick={() => handleAddButtonEvent('addToBlockedList')}> Add to Block List</Button>
+        <div className="content">
+          <Button onClick={() => handleAddButtonEvent('addToSafeList')}> Add to Safelist</Button>
+          <Button onClick={() => handleAddButtonEvent('addToBlockedList')}> Add to Blocklist</Button>
+        </div>
       </form>
     )
   }
