@@ -262,10 +262,16 @@ const NameForm = () => {
     }
   };
 
+  const ClickMe = () => {
+    console.log("Button Clicked");
+    handleAddButtonEvent('addToSafeList')
+  };
+
   function mainpage() {
     return (
-      <form onSubmit={handleSubmit}>
-         <div className="content">
+      <div>
+        <form onSubmit={handleSubmit}>
+        <div className="content">
           <input
             type="text"
             placeholder="Type an address and press enter..."
@@ -273,12 +279,13 @@ const NameForm = () => {
             onChange={e => handleChange(e)}
           />
         </div>
+        </form>
         <img className='logo' src={logo} />
         <div className="content">
         <Button onClick={() => handleAddButtonEvent('addToSafeList')} color="primary"> Add to Safelist</Button>
         <Button onClick={() => handleAddButtonEvent('addToBlockedList')} color="secondary"> Add to Blocklist</Button>
         </div>
-      </form>
+      </div>
     )
   }
 
