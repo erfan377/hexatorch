@@ -2,7 +2,7 @@ body {
   flex-direction: column;
   background-color: #FFFFFF;
   height: 400px;
-  width: 350px;
+  width: 300px;
   margin: 0px;
   border-radius: 10px;
   align-content: center;
@@ -53,4 +53,10 @@ input {
   border-color: #B1B0B9;
   background-color: #EDE7E7;
   border-radius: 10px;
+}
+
+.confirmationPage {
+  display: flex;
+  align-items: center;
+
 }
