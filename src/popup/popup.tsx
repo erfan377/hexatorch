@@ -15,7 +15,7 @@ const NameForm = () => {
     responseJson = await response.json();
     let ethUsd = responseJson.result.ethusd
     let averagePrice = ethUsd * gasGwei / 1000000000 * 21000
-    averagePrice = parseFloat(averagePrice.toFixed(3))
+    averagePrice = parseFloat(averagePrice.toFixed(2))
     setGas({ gwei: gasGwei, usd: averagePrice })
   }
 
@@ -80,10 +80,9 @@ const NameForm = () => {
     return (
       <div className='BlockedPage'>
         <p>
-          {addressBar} address is bad
+          {addressBar} address is bad on server
         </p>
-
-        <Button onClick={handleRemoveButtonEvent}> Remove from BlockedList</Button>
+        <Button onClick={() => handleAddButtonEvent('addToSafeList')}> Add to Safe List</Button>
       </div>
     )
   }
@@ -92,9 +91,8 @@ const NameForm = () => {
     return (
       <div className='BlockedPage'>
         <p>
-          {addressBar} address is bad
+          {addressBar} address is bad locally
         </p>
-
         <Button onClick={handleRemoveButtonEvent}> Remove from BlockedList</Button>
       </div>
     )
@@ -104,10 +102,9 @@ const NameForm = () => {
     return (
       <div className='SafePage'>
         <p>
-          {addressBar} address is safe
+          {addressBar} address is safe on server
         </p>
-
-        <Button onClick={handleRemoveButtonEvent}> Remove from SafeList</Button>
+        <Button onClick={() => handleAddButtonEvent('addToBlockedList')}> Add to Block List</Button>
       </div>
     )
   }
@@ -116,7 +113,7 @@ const NameForm = () => {
     return (
       <div className='SafePage'>
         <p>
-          {addressBar} address is safe
+          {addressBar} address is safe locally
         </p>
 
         <Button onClick={handleRemoveButtonEvent}> Remove from SafeList</Button>
@@ -135,21 +132,21 @@ const NameForm = () => {
   }
 
   useEffect(() => {
-    getGas()
     showPage()
-  }, [addressBar, page]);
+  }, [addressBar, page, gas]);
 
 
 
   useEffect(() => {
+
     if (page === 'removed' || page === 'notFound') {
       setPage('main')
     }
     getGas()
     chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
       let tmpurl = tabs[0].url;
-      let tmp = new URL(tmpurl);
-      if (isURL(tmp.hostname.toLowerCase())) {
+      if (isURL(tmpurl)) {
+        let tmp = new URL(tmpurl);
         setAddressBar(tmp.hostname.toLowerCase());
         checkAddress(tmp.hostname.toLowerCase(), false);
       }
@@ -159,7 +156,7 @@ const NameForm = () => {
 
   function handleSubmit(event) {
     event.preventDefault();
-    if (isURL(addressBar.toLowerCase())) {
+    if (isURL(addressBar)) {
       checkAddress(addressBar.toLowerCase(), true)
     } else {
       setPage('errorType')
@@ -234,8 +231,6 @@ const NameForm = () => {
       )
     }
   }
-
-
 
   const addToDatabase = (action, address) => {
     chrome.runtime.sendMessage({ command: { type: action, value: address } }, response => {
