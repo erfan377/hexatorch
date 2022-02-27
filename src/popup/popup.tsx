@@ -299,11 +299,6 @@ const NameForm = () => {
     }
   };
 
-  const ClickMe = () => {
-    console.log("Button Clicked");
-    handleAddButtonEvent('addToSafeList')
-  };
-
   function mainpage() {
     return (
       <div>
