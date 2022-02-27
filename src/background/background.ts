@@ -1,11 +1,9 @@
-// // TODO: background script
 import { initializeApp } from "firebase/app";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
 import isURL from 'validator/lib/isURL';
 
 chrome.runtime.onInstalled.addListener(() => {
   chrome.alarms.create('fetchServer', { when: Date.now(), periodInMinutes: 30 })
-
 })
 
 const getObjectFromLocalStorage = async function (key) {
@@ -67,34 +65,28 @@ async function removeURL(url) {
     localBlockedlist = localBlockedlist.filter(item => item !== url)
     chrome.storage.local.set({ "blockedlist": localBlockedlist });
     return 'removedBlocked'
-
   }
 }
 
-//TODO: make this intro a if statement for response
 async function addURL(newURL, listtype) {
   var localApprovedlist = await fetchLocal("approvedlist");
   var localBlockedlist = await fetchLocal("blockedlist");
   if (listtype == "approvedlist") {
     if (localApprovedlist.includes(newURL)) {
-      //URL already exists in approvedlist
       return 'existsSafe';
     }
     else {
       localApprovedlist.push(newURL);
-      // console.log("successfully added " + newURL + " to the approvedlist");
       chrome.storage.local.set({ "approvedlist": localApprovedlist });
       return 'addedSafe';
     }
   }
   else if (listtype == "blockedlist") {
     if (localBlockedlist.includes(newURL)) {
-      //URL already exists in blockedlist
       return 'existsBlocked';
     }
     else {
       localBlockedlist.push(newURL);
-      // console.log("successfully added " + newURL + " to the blockedList");
       chrome.storage.local.set({ "blockedlist": localBlockedlist });
       return 'addedBlocked';
     }
@@ -161,6 +153,7 @@ async function fetchServer(list) {
   })
   return urlList
 }
+
 async function cacheServer() {
   let safeUrl = await fetchServer('approved_links')
   chrome.storage.local.set({ "serverApprovedList": safeUrl });
@@ -173,7 +166,7 @@ chrome.alarms.onAlarm.addListener(cacheServer)
 function checkRunResult(result, url) {
   if (result === 'safeLocal' || result === 'safeServer') {
     chrome.action.setBadgeText({ text: 'SAFE' });
-    chrome.action.setBadgeBackgroundColor({ color: '#00FF00' });
+    chrome.action.setBadgeBackgroundColor({ color: '#16BD00' });
   } else if (result === 'blockedLocal' || result === 'blockedServer') {
     chrome.notifications.create({
       type: 'basic',

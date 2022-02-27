@@ -1,4 +1,4 @@
-import React, { Component, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import ReactDOM from 'react-dom'
 import './popup.css'
 import logo from "./logo.jpg";
@@ -31,9 +31,9 @@ const NameForm = () => {
   function showNotFoundfn() {
     return (
       <div className='content'>
-      <div className='confirmationPage'>
-        <h3 className='explanationNeutral'>Nothing was found</h3>
-      </div>
+        <div className='confirmationPage'>
+          <h3 className='explanationNeutral'>Nothing was found</h3>
+        </div>
       </div>
     )
   }
@@ -41,10 +41,10 @@ const NameForm = () => {
   function showRemovedfn() {
     return (
       <div className='content'>
-      <div className='confirmationPage'>
-        <h3 className='address'>{addressBar}</h3>
-        <h3 className='explanationNeutral'>Was just removed</h3>
-      </div>
+        <div className='confirmationPage'>
+          <h3 className='address'>{addressBar}</h3>
+          <h3 className='explanationNeutral'>Was just removed</h3>
+        </div>
       </div>
     )
   }
@@ -52,12 +52,12 @@ const NameForm = () => {
   function showApproveBlockedfn() {
     return (
       <div className='content'>
-      <div className='confirmationPage'>
-        <p className='address'>{addressBar} </p>
-        <h3 className='explanationNeutral'>Added to your blocklist</h3>
-        <p></p>
-        <Button onClick={handleRemoveButtonEvent}>Remove from blocked</Button>
-      </div>
+        <div className='confirmationPage'>
+          <p className='address'>{addressBar} </p>
+          <h3 className='explanationNeutral'>Added to your blocklist</h3>
+          <p></p>
+          <Button onClick={handleRemoveButtonEvent}>Remove from blocked</Button>
+        </div>
       </div>
     )
   }
@@ -65,12 +65,12 @@ const NameForm = () => {
   function showApproveSafefn() {
     return (
       <div className='content'>
-      <div className='confirmationPage'>
-        <h3 className='address'>{addressBar}</h3>
-        <h3 className='explanationGreen'>Added to your safelist!</h3>
-        <p></p>
-        <Button onClick={handleRemoveButtonEvent}>Remove from SafeList</Button>
-      </div>
+        <div className='confirmationPage'>
+          <h3 className='address'>{addressBar}</h3>
+          <h3 className='explanationGreen'>Added to your safelist!</h3>
+          <p></p>
+          <Button onClick={handleRemoveButtonEvent}>Remove from SafeList</Button>
+        </div>
       </div>
     )
   }
@@ -79,10 +79,10 @@ const NameForm = () => {
   function showErrorAddfn() {
     return (
       <div className='content'>
-      <div className='confirmationPage'>
-        <h3 className='address'>{addressBar}</h3>
-        <h3 className='explanationRed'>Error while adding. Please try again.</h3>
-      </div>
+        <div className='confirmationPage'>
+          <h3 className='address'>{addressBar}</h3>
+          <h3 className='explanationRed'>Error while adding. Please try again.</h3>
+        </div>
       </div>
     )
   }
@@ -90,11 +90,11 @@ const NameForm = () => {
   function showBlockedStateServer() {
     return (
       <div className='content'>
-      <div className='confirmationPage'>
-        <h3 className='address'>{addressBar}</h3>
-        <h3 className='explanationRed'>Address is on our blocklist.</h3>
-        <h3 className='explanationRed'>Proceed at your own risk.</h3>
-      </div>
+        <div className='confirmationPage'>
+          <h3 className='address'>{addressBar}</h3>
+          <h3 className='explanationRed'>Address is on our blocklist.</h3>
+          <h3 className='explanationRed'>Proceed at your own risk.</h3>
+        </div>
       </div>
     )
   }
@@ -102,12 +102,12 @@ const NameForm = () => {
   function showBlockedStateLocal() {
     return (
       <div className='content'>
-      <div className='confirmationPage'>
-        <h3 className='address'>{addressBar}</h3>
-        <h3 className='explanationRed'>This is on your blocklist</h3>
-        <p></p>
-        <Button onClick={handleRemoveButtonEvent}> Remove from Blocklist</Button>
-      </div>
+        <div className='confirmationPage'>
+          <h3 className='address'>{addressBar}</h3>
+          <h3 className='explanationRed'>This is on your blocklist</h3>
+          <p></p>
+          <Button onClick={handleRemoveButtonEvent}> Remove from Blocklist</Button>
+        </div>
       </div>
     )
   }
@@ -115,12 +115,10 @@ const NameForm = () => {
   function showSafeStateServer() {
     return (
       <div className='content'>
-      <div className='confirmationPage'>
-        <h3 className='address'>{addressBar}</h3>
-        <h3 className='explanationGreen'>Address is on our safelist!</h3>
-        <p></p>
-        <Button onClick={() => handleAddButtonEvent('addToBlockedList')}>Add to blocklist</Button>
-      </div>
+        <div className='confirmationPage'>
+          <h3 className='address'>{addressBar}</h3>
+          <h3 className='explanationGreen'>Address is on our safelist!</h3>
+        </div>
       </div>
     )
   }
@@ -128,12 +126,12 @@ const NameForm = () => {
   function showSafeStateLocal() {
     return (
       <div className='content'>
-      <div className='confirmationPage'>
-        <h3 className='address'>{addressBar}</h3>
-        <h3 className='explanationGreen'>This is on your safelist!</h3>
-        <p></p>
-        <Button onClick={handleRemoveButtonEvent}>Remove from Safelist</Button>
-      </div>
+        <div className='confirmationPage'>
+          <h3 className='address'>{addressBar}</h3>
+          <h3 className='explanationGreen'>This is on your safelist!</h3>
+          <p></p>
+          <Button onClick={handleRemoveButtonEvent}>Remove from Safelist</Button>
+        </div>
       </div>
     )
   }
@@ -141,10 +139,10 @@ const NameForm = () => {
   function showErrorType() {
     return (
       <div className='content'>
-      <div className='confirmationPage'>
-        <h3 className='address'>{addressBar}</h3>
-        <h3 className='explanationRed'>Not valid address</h3>
-      </div>
+        <div className='confirmationPage'>
+          <h3 className='address'>{addressBar}</h3>
+          <h3 className='explanationRed'>Not valid address</h3>
+        </div>
       </div>
     )
   }
@@ -154,9 +152,7 @@ const NameForm = () => {
   }, [addressBar, page, gas]);
 
 
-
   useEffect(() => {
-
     if (page === 'removed' || page === 'notFound') {
       setPage('main')
     }
@@ -181,11 +177,8 @@ const NameForm = () => {
     }
   }
 
-
-
   function checkAddress(address, submission) {
     chrome.runtime.sendMessage({ command: { type: 'checkAddress', value: address } }, response => {
-      console.log('backend,', response)
       if (response === 'safeLocal') {
         setPage('safeLocal')
       } else if (response === 'safeServer') {
@@ -286,21 +279,21 @@ const NameForm = () => {
   function mainpage() {
     return (
       <div>
-         <form onSubmit={handleSubmit}>
-         <div className="content">
-           <input
-             type="text"
-             placeholder="Type an address and press enter..."
-             value={addressBar}
-             onChange={e => handleChange(e)}
-           />
-         </div>
-         </form>
-         <div className="content">
-         <Button onClick={() => handleAddButtonEvent('addToSafeList')} color="primary"> Add to Safelist</Button>
-         <Button onClick={() => handleAddButtonEvent('addToBlockedList')} color="secondary"> Add to Blocklist</Button>
-         </div>
-       </div>
+        <form onSubmit={handleSubmit}>
+          <div className="content">
+            <input
+              type="text"
+              placeholder="Type an address and press enter..."
+              value={addressBar}
+              onChange={e => handleChange(e)}
+            />
+          </div>
+        </form>
+        <div className="content">
+          <Button onClick={() => handleAddButtonEvent('addToSafeList')} color="primary"> Add to Safelist</Button>
+          <Button onClick={() => handleAddButtonEvent('addToBlockedList')} color="secondary"> Add to Blocklist</Button>
+        </div>
+      </div>
     )
   }
 
@@ -317,7 +310,6 @@ const NameForm = () => {
       </div>
     </div>
   );
-
 }
 
 const App: React.FC<{}> = () => {
