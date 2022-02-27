@@ -1,29 +1,42 @@
 {
-  "name": "Hexatorch",
-  "description": "Chrome Extension to Protect Web3 Users from Phishing Scams!",
+  "name": "React Extension",
+  "description": "Chrome Extension in React!",
   "version": "1.0.0",
   "manifest_version": 3,
   "icons": {
-    "8": "icon-8.png",
-    "16": "icon-16.png",
-    "48": "icon-32.png",
-    "128": "icon-128.png"
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
   },
   "action": {
     "default_popup": "popup.html",
     "default_title": "React Extension",
-    "default_icon": "icon-128.png"
+    "default_icon": "icon.png"
   },
-  "permissions": [
-    "storage",
-    "activeTab",
-    "tabs",
-    "alarms",
-    "notifications"
-  ],
+  "permissions": ["storage",
+                  "activeTab",
+                  "tabs"],
   "options_page": "options.html",
   "background": {
     "service_worker": "background.js"
   },
-  "content_scripts": []
+  "web_accessible_resources": [{
+    "resources": ["contentScript.bundle.css", "logo.jpg"],
+    "matches": ["<all_urls>"]
+  }],
+
+
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*/*",
+        "http://*/*"
+      ],
+      "js": [
+        "contentScript.js"
+      ]
+    }
+  ]
 }
+
+

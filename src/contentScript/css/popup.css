@@ -1,3 +1,5 @@
+:host { all: initial }
+
 body {
   flex-direction: column;
   background-color: 'white';
