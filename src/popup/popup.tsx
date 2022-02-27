@@ -2,8 +2,6 @@ import React, { Component, useEffect, useState } from 'react'
 import ReactDOM from 'react-dom'
 import './popup.css'
 import logo from "./logo.jpg";
-// import Button from 'react-bootstrap/Button';
-// import 'bootstrap/dist/css/bootstrap.min.css';
 import { Button } from "../components/Button";
 import isURL from 'validator/lib/isURL';
 
@@ -301,23 +299,30 @@ const NameForm = () => {
     }
   };
 
+  const ClickMe = () => {
+    console.log("Button Clicked");
+    handleAddButtonEvent('addToSafeList')
+  };
+
   function mainpage() {
     return (
-      <form onSubmit={handleSubmit}>
-        <div className="content">
-          <input
-            type="text"
-            placeholder="Type an address and press enter..."
-            value={addressBar}
-            onChange={e => handleChange(e)}
-          />
-        </div>
-        <img className='logo' src={logo} />
-        <div className="content">
-        </div>
-        <Button onClick={() => handleAddButtonEvent('addToSafeList')} color="primary"> Add to Safelist</Button>
-        <Button onClick={() => handleAddButtonEvent('addToBlockedList')} color="secondary"> Add to Blocklist</Button>
-      </form>
+      <div>
+         <form onSubmit={handleSubmit}>
+         <div className="content">
+           <input
+             type="text"
+             placeholder="Type an address and press enter..."
+             value={addressBar}
+             onChange={e => handleChange(e)}
+           />
+         </div>
+         </form>
+         <img className='logo' src={logo} />
+         <div className="content">
+         <Button onClick={() => handleAddButtonEvent('addToSafeList')} color="primary"> Add to Safelist</Button>
+         <Button onClick={() => handleAddButtonEvent('addToBlockedList')} color="secondary"> Add to Blocklist</Button>
+         </div>
+       </div>
     )
   }
 
