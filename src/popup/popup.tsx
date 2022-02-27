@@ -2,7 +2,8 @@ import React, { Component, useEffect, useState } from 'react'
 import ReactDOM from 'react-dom'
 import './popup.css'
 import logo from "./logo.jpg";
-import { Button } from "../components/Button";
+import Button from 'react-bootstrap/Button';
+
 import isURL from 'validator/lib/isURL';
 
 const NameForm = () => {
@@ -217,6 +218,7 @@ const NameForm = () => {
     } else if (page === 'notFound') {
 
       return showNotFoundfn()
+
     } else if (page === 'errorAdding') {
 
       return showErrorAddfn()
@@ -224,6 +226,7 @@ const NameForm = () => {
     } else if (page === 'errorType') {
 
       return showErrorType()
+
     } else {
       return (
         <div>
@@ -265,19 +268,26 @@ const NameForm = () => {
   function mainpage() {
     return (
       <form onSubmit={handleSubmit}>
-         <div className="content">
+        <div className="content">
           <input
             type="text"
             placeholder="Type an address and press enter..."
             value={addressBar}
             onChange={e => handleChange(e)}
+            style={{
+              padding: "10px 20px",
+              width: "300px",
+              textAlign: "left",
+              border: "0px",
+              marginLeft: "25px",
+              backgroundColor: '#EDE7E7',
+              borderRadius: '10px',
+            }}
           />
         </div>
         <img className='logo' src={logo} />
-        <div className="content">
-        <Button onClick={() => handleAddButtonEvent('addToSafeList')} color="primary"> Add to Safelist</Button>
-        <Button onClick={() => handleAddButtonEvent('addToBlockedList')} color="secondary"> Add to Blocklist</Button>
-        </div>
+        <Button onClick={() => handleAddButtonEvent('addToSafeList')}> Add to Safe List</Button>
+        <Button onClick={() => handleAddButtonEvent('addToBlockedList')}> Add to Block List</Button>
       </form>
     )
   }
