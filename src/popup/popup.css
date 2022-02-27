@@ -1,17 +1,18 @@
 body {
   flex-direction: column;
   background-color: #FFFFFF;
-  height: 400px;
-  width: 300px;
+  height: 500px;
+  width: 350px;
   margin: 0px;
   border-radius: 10px;
   align-content: center;
+  font-family: sans-serif;
 }
 
 .header {
-  background-color: #B1B0B9;
-  color: #FFFFFF;
-  height: 55px;
+  background-color: #f2f3f4;
+  color: #6d747d;
+  height: 45px;
   width: 400px;
   display: block;
   margin: auto;
@@ -21,21 +22,20 @@ body {
 text.gaspricetitle {
   position: relative;
   padding: 15px;
-  font-size: 14px;
+  font-size: 13px;
   text-align: left;
 }
 text.gasprice {
   position: relative;
   padding: 15px;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: bold;
 }
 .logo {
-  height: 170px;
-  width: 200px;
+  width: 270px;
   align-self: center;
-  margin-left: 100px;
-  margin-top: 30px;
+  margin-left: 40px;
+  margin-top: 50px;
 }
 
 div.content {
@@ -46,13 +46,25 @@ div.content {
 }
 
 input {
-  padding: 10px;
-  width: 300px;
-  text-align: left;
-  border: 10px;
-  border-color: #B1B0B9;
-  background-color: #EDE7E7;
-  border-radius: 10px;
+    padding: 10px 0px;
+    background-color: #FFFFFF;
+    width: 300px;
+    text-align: left;
+    margin-left: 15px;
+    margin-bottom: 30px;
+    margin-top: 40px;
+    margin-right: 15px;
+    border-radius: 0px;
+    border-top: 0px;
+    border-left: 0px;
+    border-right: 0px;
+    font-size: 15px;
+    color:#6d747d;
+    font-family: avenir;
+}
+
+input:focus{
+  outline: none;
 }
 
 .confirmationPage {
