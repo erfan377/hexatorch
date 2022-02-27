@@ -5,7 +5,6 @@ import logo from "./logo.jpg";
 import Button from 'react-bootstrap/Button';
 import isURL from 'validator/lib/isURL';
 
-
 const NameForm = () => {
 
   async function getGas() {
@@ -139,6 +138,7 @@ const NameForm = () => {
 
 
   useEffect(() => {
+
     if (page === 'removed' || page === 'notFound') {
       setPage('main')
     }

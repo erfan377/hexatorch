@@ -1,11 +1,11 @@
 // // TODO: background script
 import { initializeApp } from "firebase/app";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
-import { getAnalytics, logEvent } from "firebase/analytics";
 import isURL from 'validator/lib/isURL';
 
 chrome.runtime.onInstalled.addListener(() => {
   chrome.alarms.create('fetchServer', { when: Date.now(), periodInMinutes: 30 })
+
 })
 
 const getObjectFromLocalStorage = async function (key) {
@@ -129,17 +129,14 @@ async function checkURL(currelhost) {
 async function run(currentHost: string) {
   let results = await checkURL(currentHost);
   if (results["inUserApprovedlist"]) {
-    //it's in the approved list
     return 'safeLocal';
   } else if (results["inServerApprovedlist"]) {
     return 'safeServer';
   } else if (results["inUserBlockedlist"]) {
-    //it's in the blocked list
     return 'blockedLocal';
   } else if (results["inServerBlockedlist"]) {
     return 'blockedServer';
   } else {
-    //didn't find it
     return 'notFound';
   }
 }
@@ -154,37 +151,30 @@ const firebaseConfig = {
   measurementId: process.env.FIREBASE_measurementId
 };
 
-try {
-
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore();
-  async function fetchServer(list) {
-    const querySnapshot = await getDocs(collection(db, list));
-    let urlList = [];
-    querySnapshot.forEach((doc) => {
-      urlList.push(doc.data().URL)
-    })
-    return urlList
-  }
-  async function cacheServer() {
-    let safeUrl = await fetchServer('approved_links')
-    chrome.storage.local.set({ "serverApprovedList": safeUrl });
-    let blockedUrl = await fetchServer('malicious_links')
-    chrome.storage.local.set({ "serverBlockedList": blockedUrl });
-  }
-  chrome.alarms.onAlarm.addListener(cacheServer)
-
-} catch (ex) {
-  console.log('Trouble launching firebase', ex)
+const app = initializeApp(firebaseConfig);
+const db = getFirestore();
+async function fetchServer(list) {
+  const querySnapshot = await getDocs(collection(db, list));
+  let urlList = [];
+  querySnapshot.forEach((doc) => {
+    urlList.push(doc.data().URL)
+  })
+  return urlList
+}
+async function cacheServer() {
+  let safeUrl = await fetchServer('approved_links')
+  chrome.storage.local.set({ "serverApprovedList": safeUrl });
+  let blockedUrl = await fetchServer('malicious_links')
+  chrome.storage.local.set({ "serverBlockedList": blockedUrl });
 }
 
+chrome.alarms.onAlarm.addListener(cacheServer)
 
 function checkRunResult(result, url) {
   if (result === 'safeLocal' || result === 'safeServer') {
     chrome.action.setBadgeText({ text: 'SAFE' });
     chrome.action.setBadgeBackgroundColor({ color: '#00FF00' });
   } else if (result === 'blockedLocal' || result === 'blockedServer') {
-
     chrome.notifications.create({
       type: 'basic',
       title: 'Malicious Website',
@@ -192,7 +182,6 @@ function checkRunResult(result, url) {
       message: `${url} is a malicious website in the database`,
       priority: 2
     })
-
     chrome.action.setBadgeText({ text: 'BAD' });
     chrome.action.setBadgeBackgroundColor({ color: '#FF0000' });
   } else if (result === 'notFound') {
