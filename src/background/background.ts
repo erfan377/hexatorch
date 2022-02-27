@@ -214,3 +214,4 @@ chrome.tabs.onActivated.addListener(function (info) {
     }
   });
 });
+
