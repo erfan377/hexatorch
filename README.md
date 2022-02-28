@@ -1,7 +1,7 @@
 # Hexatorch Chrome Extenstion
 
 ## Download
-[Link to the Google Web Store](https://github.com/erfan377/hexatorch)
+[Link to the Google Web Store](https://chrome.google.com/webstore/detail/hexatorch/hmganhlloociacleeplakhknjgoncbae/related?hl=en&authuser=5)
 
 ## Getting Started
 
