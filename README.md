@@ -1,4 +1,7 @@
-# React Chrome Extension Boilerplate
+# Hexatorch Chrome Extenstion
+
+## Download
+[Link to the Google Web Store](https://github.com/erfan377/hexatorch)
 
 ## Getting Started
 
