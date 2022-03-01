@@ -1,4 +1,4 @@
-# Hexatorch Chrome Extenstion
+# HexaTorch Chrome Extenstion
 
 ## Download
 [Link to the Google Web Store](https://chrome.google.com/webstore/detail/hexatorch/hmganhlloociacleeplakhknjgoncbae/related?hl=en&authuser=5)  
