@@ -2,8 +2,15 @@ import { initializeApp } from "firebase/app";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
 import isURL from 'validator/lib/isURL';
 
-chrome.runtime.onInstalled.addListener(() => {
+chrome.runtime.onInstalled.addListener((details) => {
   chrome.alarms.create('fetchServer', { when: Date.now(), periodInMinutes: 30 })
+
+  console.log('detail', details)
+  if (details.reason === 'install') {
+    chrome.tabs.create({
+      url: './pin.gif'
+    });
+  }
 })
 
 const getObjectFromLocalStorage = async function (key) {
@@ -207,4 +214,3 @@ chrome.tabs.onActivated.addListener(function (info) {
     }
   });
 });
-
