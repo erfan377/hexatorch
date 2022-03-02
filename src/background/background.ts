@@ -3,14 +3,14 @@ import { getFirestore, collection, getDocs } from "firebase/firestore";
 import isURL from 'validator/lib/isURL';
 
 chrome.runtime.onInstalled.addListener((details) => {
-  chrome.alarms.create('fetchServer', { when: Date.now(), periodInMinutes: 30 })
+  chrome.alarms.create('fetchServer', { when: Date.now(), periodInMinutes: 10 })
 
-  console.log('detail', details)
   if (details.reason === 'install') {
     chrome.tabs.create({
       url: './pin.gif'
     });
   }
+
 })
 
 const getObjectFromLocalStorage = async function (key) {
@@ -57,6 +57,11 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     removeURL(msg.command.value).then((result) => {
       sendResponse(result)
     })
+    return true
+  } else if (msg.command.type === "setNotification") {
+    chrome.storage.local.set({ "notificationBlocked": msg.command.value.block })
+    chrome.storage.local.set({ "notificationSafe": msg.command.value.safe })
+    
     return true
   }
 });
@@ -170,18 +175,41 @@ async function cacheServer() {
 
 chrome.alarms.onAlarm.addListener(cacheServer)
 
-function checkRunResult(result, url) {
+function showNotification(command, info) {
+  if(command) {
+    chrome.notifications.create(info)
+  }
+}
+
+async function checkRunResult(result, url) {
   if (result === 'safeLocal' || result === 'safeServer') {
+
+    let notificationSetting = {
+      type: 'basic',
+      title: 'HexaTorch Safe Website',
+      iconUrl: "./icon-128.png",
+      message: `${url} is a safe website in the database`,
+      priority: 2
+    }
+
+    let notificationStatus = await getObjectFromLocalStorage('notificationSafe')
+    showNotification(notificationStatus, notificationSetting);
+
     chrome.action.setBadgeText({ text: 'SAFE' });
     chrome.action.setBadgeBackgroundColor({ color: '#16BD00' });
   } else if (result === 'blockedLocal' || result === 'blockedServer') {
-    chrome.notifications.create({
+
+    let notificationSetting = {
       type: 'basic',
-      title: 'Malicious Website',
+      title: 'HexaTorch Malicious Website',
       iconUrl: "./icon-128.png",
       message: `${url} is a malicious website in the database`,
       priority: 2
-    })
+    }
+
+    let notificationStatus = await getObjectFromLocalStorage('notificationBlocked')
+    showNotification(notificationStatus, notificationSetting);
+
     chrome.action.setBadgeText({ text: 'BAD' });
     chrome.action.setBadgeBackgroundColor({ color: '#FF0000' });
   } else if (result === 'notFound') {
