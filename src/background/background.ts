@@ -4,6 +4,8 @@ import isURL from 'validator/lib/isURL';
 
 chrome.runtime.onInstalled.addListener((details) => {
   chrome.alarms.create('fetchServer', { when: Date.now(), periodInMinutes: 10 })
+  chrome.alarms.create('serverSetting', { when: Date.now(), periodInMinutes: 60 })
+
 
   if (details.reason === 'install') {
     chrome.tabs.create({
@@ -157,23 +159,55 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore();
+
 async function fetchServer(list) {
   const querySnapshot = await getDocs(collection(db, list));
   let urlList = [];
   querySnapshot.forEach((doc) => {
-    urlList.push(doc.data().URL)
+    if (doc.data().URLs !== undefined){
+      for (const elem of doc.data().URLs) {
+        if (elem.URL !== undefined) {
+          urlList.push(elem.URL)
+        }
+      }
+    }
   })
   return urlList
 }
 
-async function cacheServer() {
-  let safeUrl = await fetchServer('approved_links')
-  chrome.storage.local.set({ "serverApprovedList": safeUrl });
-  let blockedUrl = await fetchServer('malicious_links')
-  chrome.storage.local.set({ "serverBlockedList": blockedUrl });
+async function getServerSetting() {
+  const querySnapshot = await getDocs(collection(db, 'globalSetting'));
+
+  querySnapshot.forEach((doc) => {
+    if (doc.id === 'storage'){
+      if(doc.data().update !== undefined) {
+        chrome.storage.local.set({ "updateServerStorage": doc.data().update });
+      }
+    }
+  })
 }
 
-chrome.alarms.onAlarm.addListener(cacheServer)
+chrome.alarms.onAlarm.addListener((alarm) => {
+  if (alarm.name === 'serverSetting') {
+    getServerSetting()
+  }
+  if (alarm.name === 'fetchServer') {
+    cacheServer()
+  }
+})
+
+
+async function cacheServer() {
+
+  let serverUpdate = await getObjectFromLocalStorage('updateServerStorage')
+  if (serverUpdate !== undefined && serverUpdate) {
+    let safeUrl = await fetchServer('approved_links')
+    chrome.storage.local.set({ "serverApprovedList": safeUrl });
+    let blockedUrl = await fetchServer('malicious_links')
+    chrome.storage.local.set({ "serverBlockedList": blockedUrl });
+  }
+}
+
 
 function showNotification(command, info) {
   if(command) {
