@@ -1,16 +1,3 @@
-.App {
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: center; /* vertical align */
-  column-gap: 1%;
+body {
+  background-color: #1c1c1c;
 }
-
-.logo {
-  width: 20%;
-  height: 20%;
-}
-
-/* .options {
-  position: absolute;
-  text-align: left;
-} */

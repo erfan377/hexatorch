@@ -1,92 +1,43 @@
 body {
   flex-direction: column;
-  background-color: #FFFFFF;
-  height: 500px;
-  width: 350px;
+  background-color: 'white';
+  height: 400px;
+  width: 400px;
   margin: 0px;
   border-radius: 10px;
   align-content: center;
-  font-family: sans-serif;
 }
-
 .header {
-  background-color: #f2f3f4;
-  color: #6d747d;
-  height: 45px;
+  background-color: #2C02A7;
+  color: #FFFFFF;
+  height: 65px;
   width: 400px;
-  display: block;
-  margin: auto;
-  padding-top: 10px;
+  margin-top: 0px;
+  margin-left: 0px;
+  margin-right: 0px;
+  margin-bottom: 20px;
 }
+.gaspricetitle {
+  position: relative;
+  top: 10px;
+  margin-left: 10px;
+  margin-top: 10px;
+  font-size: 18px;
+  text-align: center;
 
-text.gaspricetitle {
-  position: relative;
-  padding: 15px;
-  font-size: 13px;
-  text-align: left;
 }
-text.gasprice {
+.gasprice {
   position: relative;
-  padding: 15px;
-  font-size: 15px;
+  top: 10px;
+  margin-left: 10px;
+  margin-top: 10px;
+  font-size: 18px;
   font-weight: bold;
 }
 .logo {
-  width: 270px;
+  height: 170px;
+  width: 200px;
   align-self: center;
-  margin-left: 40px;
-  margin-top: 50px;
-}
-
-div.content {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 10px;
-}
-
-input {
-    padding: 10px 0px;
-    background-color: #FFFFFF;
-    width: 300px;
-    text-align: left;
-    margin-left: 15px;
-    margin-bottom: 30px;
-    margin-top: 40px;
-    margin-right: 15px;
-    border-radius: 0px;
-    border-top: 0px;
-    border-left: 0px;
-    border-right: 0px;
-    font-size: 15px;
-    color:#6d747d;
-    font-family: avenir;
-}
-
-input:focus{
-  outline: none;
-}
-
-.confirmationPage {
-  display: inline-block;
-  vertical-align: middle;
-}
-
-.explanationGreen {
-  color: green !important;
-  text-align: center;
-}
-
-.address {
-  text-align: center;
-}
-
-.explanationRed {
-  color: red !important;
-  text-align: center;
-}
-
-.explanationNeutral {
-  color: #6d747d !important;
-  text-align: center;
+  margin-left: 100px;
+  margin-top: 30px;
 }

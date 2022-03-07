@@ -2,14 +2,14 @@ const path = require('path');
 const CopyPlugin = require('copy-webpack-plugin');
 const HtmlPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-const Dotenv = require('dotenv-webpack');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
 module.exports = {
   entry: {
     popup: path.resolve('src/popup/popup.tsx'),
     options: path.resolve('src/options/options.tsx'),
     background: path.resolve('src/background/background.ts'),
-    contentScript: path.resolve('src/contentScript/contentScript.ts'),
+    contentScript: path.resolve('src/contentScript/contentScript.tsx'),
   },
   module: {
     rules: [
@@ -20,7 +20,13 @@ module.exports = {
       },
       {
         test: /\.css$/i,
+        exclude: [path.resolve(__dirname, 'src/contentScript/')],
         use: ['style-loader', 'css-loader'],
+      },
+      {
+        test: /\.css$/i,
+        include: path.resolve(__dirname, 'src/contentScript/'),
+        use: [MiniCssExtractPlugin.loader, 'css-loader'],
       },
       {
         test: /\.(jpg|jpeg|png|woff|woff2|eot|ttf|svg)$/,
@@ -32,6 +38,10 @@ module.exports = {
     extensions: ['.tsx', '.ts', '.js'],
   },
   plugins: [
+    new MiniCssExtractPlugin({
+      filename: '[name].bundle.css',
+      chunkFilename: '[id].css'
+    }),
     new CleanWebpackPlugin({
       cleanStaleWebpackAssets: false,
     }),
@@ -47,14 +57,6 @@ module.exports = {
       'popup',
       'options'
     ]),
-    new Dotenv({
-      path: './.env', // load this now instead of the ones in '.env'
-      safe: true, // load '.env.example' to verify the '.env' variables are all set. Can also be a string to a different file.
-      allowEmptyValues: true, // allow empty variables (e.g. `FOO=`) (treat it as empty string, rather than missing)
-      systemvars: true, // load all the predefined 'process.env' variables which will trump anything local per dotenv specs.
-      silent: true, // hide any errors
-      defaults: false, // load '.env.defaults' as the default values if empty.
-    })
   ],
   output: {
     filename: '[name].js',

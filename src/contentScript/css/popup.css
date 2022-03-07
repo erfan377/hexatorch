@@ -1,0 +1,97 @@
+:host { all: initial }
+
+body {
+  flex-direction: column;
+  background-color: #fff;
+  height: 400px;
+  width: 400px;
+  margin: 0;
+  border-radius: 10px;
+  align-content: center;
+}
+div.body {
+  font-family: Arial, Helvetica, sans-serif;
+  width: 430px;
+  padding: 15px;
+  border-radius: 5px;
+  box-sizing: border-box;
+  background: #fff;
+  border: 1px #000 solid;
+}
+.header {
+  background-color: #2C02A7;
+  color: #FFFFFF;
+  height: 65px;
+  width: 400px;
+  margin-top: 0;
+  margin-left: 0;
+  margin-right: 0;
+  margin-bottom: 20px;
+}
+.gaspricetitle {
+  position: relative;
+  top: 10px;
+  margin-left: 10px;
+  margin-top: 10px;
+  font-size: 18px;
+  text-align: center;
+
+}
+.gasprice {
+  position: relative;
+  top: 10px;
+  margin-left: 10px;
+  margin-top: 10px;
+  font-size: 18px;
+  font-weight: bold;
+}
+.logo {
+  height: 170px;
+  width: 200px;
+  align-self: center;
+  margin-left: 100px;
+  margin-top: 30px;
+}
+
+.img.collapse {
+  background-color: #fff;
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+}
+
+.collapse-action-button img {
+  width: 100%;
+  height: 100%;
+  display: block !important;
+}
+
+.collapsed-status-button {
+  display: block !important;
+  background-color: #fff;
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+}
+
+.img{
+  width: 100%;
+  height: 100%;
+  background-size: contain;
+}
+
+.img.unknown {background-image: url(data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjAgMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEwIDIwYTEwIDEwIDAgMSAxIDAtMjAgMTAgMTAgMCAwIDEgMCAyMHptMi0xM2MwIC4yOC0uMjEuOC0uNDIgMUwxMCA5LjU4Yy0uNTcuNTgtMSAxLjYtMSAyLjQydjFoMnYtMWMwLS4yOS4yMS0uOC40Mi0xTDEzIDkuNDJjLjU3LS41OCAxLTEuNiAxLTIuNDJhNCA0IDAgMSAwLTggMGgyYTIgMiAwIDEgMSA0IDB6bS0zIDh2Mmgydi0ySDl6Ii8+PC9zdmc+)}
+.img.collapse {background-image: url(data:image/svg+xml;base64,PHN2ZyBkYXRhLW5hbWU9IkxheWVyIDEiIGlkPSJMYXllcl8xIiB2aWV3Qm94PSIwIDAgNTEyIDUxMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cG9seWdvbiBwb2ludHM9IjM2NC41MiAxOTkuMjYgMzMzLjk1IDE5OS4yNiA0MDguNTIgMTI0LjY5IDM4Ny4zMSAxMDMuNDggMzEyLjc0IDE3OC4wNSAzMTIuNzQgMTQ3LjQ4IDI4Mi43NCAxNDcuNDggMjgyLjc0IDIyOS4yNiAzNjQuNTIgMjI5LjI2IDM2NC41MiAxOTkuMjYiLz48cGF0aCBkPSJNNDQ4LDM0SDM0VjQ3OEg0NzhWMzRabTAsNDE0SDY0VjY0SDQ0OFoiLz48cG9seWdvbiBwb2ludHM9IjMxMi43NCAzMzMuOTUgMzg3LjMxIDQwOC41MiA0MDguNTIgMzg3LjMxIDMzMy45NSAzMTIuNzQgMzY0LjUyIDMxMi43NCAzNjQuNTIgMjgyLjc0IDI4Mi43NCAyODIuNzQgMjgyLjc0IDM2NC41MiAzMTIuNzQgMzY0LjUyIDMxMi43NCAzMzMuOTUiLz48cG9seWdvbiBwb2ludHM9IjE5OS4yNiAzMzMuOTUgMTk5LjI2IDM2NC41MiAyMjkuMjYgMzY0LjUyIDIyOS4yNiAyODIuNzQgMTQ3LjQ4IDI4Mi43NCAxNDcuNDggMzEyLjc0IDE3OC4wNSAzMTIuNzQgMTAzLjQ4IDM4Ny4zMSAxMjQuNjkgNDA4LjUyIDE5OS4yNiAzMzMuOTUiLz48cG9seWdvbiBwb2ludHM9IjE0Ny40OCAxOTkuMjYgMTQ3LjQ4IDIyOS4yNiAyMjkuMjYgMjI5LjI2IDIyOS4yNiAxNDcuNDggMTk5LjI2IDE0Ny40OCAxOTkuMjYgMTc4LjA1IDEyNC42OSAxMDMuNDggMTAzLjQ4IDEyNC42OSAxNzguMDUgMTk5LjI2IDE0Ny40OCAxOTkuMjYiLz48L3N2Zz4=);}
+.img.approved {background-image: url(data:image/svg+xml;base64,PHN2ZyBpZD0iTGF5ZXJfMSIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAwIDAgNTEyIDUxMjsiIHZlcnNpb249IjEuMSIgdmlld0JveD0iMCAwIDUxMiA1MTIiIHhtbDpzcGFjZT0icHJlc2VydmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiPjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+LnN0MHtmaWxsOiMyQkI2NzM7fS5zdDF7ZmlsbDpub25lO3N0cm9rZTojRkZGRkZGO3N0cm9rZS13aWR0aDozMDtzdHJva2UtbWl0ZXJsaW1pdDoxMDt9PC9zdHlsZT48cGF0aCBjbGFzcz0ic3QwIiBkPSJNNDg5LDI1NS45YzAtMC4yLDAtMC41LDAtMC43YzAtMS42LDAtMy4yLTAuMS00LjdjMC0wLjktMC4xLTEuOC0wLjEtMi44YzAtMC45LTAuMS0xLjgtMC4xLTIuNyAgYy0wLjEtMS4xLTAuMS0yLjItMC4yLTMuM2MwLTAuNy0wLjEtMS40LTAuMS0yLjFjLTAuMS0xLjItMC4yLTIuNC0wLjMtMy42YzAtMC41LTAuMS0xLjEtMC4xLTEuNmMtMC4xLTEuMy0wLjMtMi42LTAuNC00ICBjMC0wLjMtMC4xLTAuNy0wLjEtMUM0NzQuMywxMTMuMiwzNzUuNywyMi45LDI1NiwyMi45UzM3LjcsMTEzLjIsMjQuNSwyMjkuNWMwLDAuMy0wLjEsMC43LTAuMSwxYy0wLjEsMS4zLTAuMywyLjYtMC40LDQgIGMtMC4xLDAuNS0wLjEsMS4xLTAuMSwxLjZjLTAuMSwxLjItMC4yLDIuNC0wLjMsMy42YzAsMC43LTAuMSwxLjQtMC4xLDIuMWMtMC4xLDEuMS0wLjEsMi4yLTAuMiwzLjNjMCwwLjktMC4xLDEuOC0wLjEsMi43ICBjMCwwLjktMC4xLDEuOC0wLjEsMi44YzAsMS42LTAuMSwzLjItMC4xLDQuN2MwLDAuMiwwLDAuNSwwLDAuN2MwLDAsMCwwLDAsMC4xczAsMCwwLDAuMWMwLDAuMiwwLDAuNSwwLDAuN2MwLDEuNiwwLDMuMiwwLjEsNC43ICBjMCwwLjksMC4xLDEuOCwwLjEsMi44YzAsMC45LDAuMSwxLjgsMC4xLDIuN2MwLjEsMS4xLDAuMSwyLjIsMC4yLDMuM2MwLDAuNywwLjEsMS40LDAuMSwyLjFjMC4xLDEuMiwwLjIsMi40LDAuMywzLjYgIGMwLDAuNSwwLjEsMS4xLDAuMSwxLjZjMC4xLDEuMywwLjMsMi42LDAuNCw0YzAsMC4zLDAuMSwwLjcsMC4xLDFDMzcuNywzOTguOCwxMzYuMyw0ODkuMSwyNTYsNDg5LjFzMjE4LjMtOTAuMywyMzEuNS0yMDYuNSAgYzAtMC4zLDAuMS0wLjcsMC4xLTFjMC4xLTEuMywwLjMtMi42LDAuNC00YzAuMS0wLjUsMC4xLTEuMSwwLjEtMS42YzAuMS0xLjIsMC4yLTIuNCwwLjMtMy42YzAtMC43LDAuMS0xLjQsMC4xLTIuMSAgYzAuMS0xLjEsMC4xLTIuMiwwLjItMy4zYzAtMC45LDAuMS0xLjgsMC4xLTIuN2MwLTAuOSwwLjEtMS44LDAuMS0yLjhjMC0xLjYsMC4xLTMuMiwwLjEtNC43YzAtMC4yLDAtMC41LDAtMC43ICBDNDg5LDI1Niw0ODksMjU2LDQ4OSwyNTUuOUM0ODksMjU2LDQ4OSwyNTYsNDg5LDI1NS45eiIgaWQ9IlhNTElEXzNfIi8+PGcgaWQ9IlhNTElEXzFfIj48bGluZSBjbGFzcz0ic3QxIiBpZD0iWE1MSURfMl8iIHgxPSIyMTMuNiIgeDI9IjM2OS43IiB5MT0iMzQ0LjIiIHkyPSIxODguMiIvPjxsaW5lIGNsYXNzPSJzdDEiIGlkPSJYTUxJRF80XyIgeDE9IjIzMy44IiB4Mj0iMTU0LjciIHkxPSIzNDUuMiIgeTI9IjI2Ni4xIi8+PC9nPjwvc3ZnPg==);}
+.img.blocked {background-image: url(data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9IjMyIiBzdHlsZT0ib3ZlcmZsb3c6dmlzaWJsZTtlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDMyIDMyIiB2aWV3Qm94PSIwIDAgMzIgMzIiIHdpZHRoPSIzMiIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayI+PGc+PGcgaWQ9IkJsb2NrXzhfIj48cGF0aCBkPSJNMjcuMyw0LjdjLTYuMi02LjItMTYuNC02LjItMjIuNiwwYy02LjIsNi4yLTYuMiwxNi40LDAsMjIuNiAgICAgICBjNi4yLDYuMiwxNi40LDYuMiwyMi42LDBDMzMuNiwyMS4xLDMzLjYsMTAuOSwyNy4zLDQuN3ogTTI0LjUsNy41YzQuMiw0LjIsNC42LDEwLjcsMS4zLDE1LjRMOS4xLDYuMiAgICAgICBDMTMuNywyLjksMjAuMywzLjMsMjQuNSw3LjV6IE03LjUsMjQuNUMzLjMsMjAuMywyLjksMTMuNyw2LjIsOS4xbDE2LjcsMTYuN0MxOC4zLDI5LjEsMTEuNywyOC43LDcuNSwyNC41eiIgaWQ9IkJsb2NrIiBzdHlsZT0iZmlsbDojRkYzOTM5OyIvPjwvZz48L2c+PC9zdmc+);}
+
+
+.minimized .body {width: auto; height: auto; padding: 3px;}
+.minimized .collapsed-status-button {display: block !important; position: static;}
+.expanded .body .body-wrapper {display: block !important;}
