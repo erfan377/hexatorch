@@ -1,3 +1,4 @@
+import { time } from "@tensorflow/tfjs";
 import { initializeApp } from "firebase/app";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
 import isURL from 'validator/lib/isURL';
@@ -5,7 +6,6 @@ import isURL from 'validator/lib/isURL';
 chrome.runtime.onInstalled.addListener((details) => {
   chrome.alarms.create('fetchServer', { when: Date.now(), periodInMinutes: 10 })
   chrome.alarms.create('serverSetting', { when: Date.now(), periodInMinutes: 60 })
-
 
   if (details.reason === 'install') {
     chrome.tabs.create({
@@ -200,6 +200,12 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 async function cacheServer() {
 
   let serverUpdate = await getObjectFromLocalStorage('updateServerStorage')
+
+  if (serverUpdate === undefined) { // It will be undefined when it's installed first time
+    await getServerSetting()
+    serverUpdate = await getObjectFromLocalStorage('updateServerStorage')
+  }
+
   if (serverUpdate !== undefined && serverUpdate) {
     let safeUrl = await fetchServer('approved_links')
     chrome.storage.local.set({ "serverApprovedList": safeUrl });

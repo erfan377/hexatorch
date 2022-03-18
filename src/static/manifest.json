@@ -1,7 +1,7 @@
 {
   "name": "Hexatorch",
   "description": "Chrome Extension to Protect Web3 Users from Phishing Scams!",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "manifest_version": 3,
   "icons": {
     "8": "icon-8.png",
