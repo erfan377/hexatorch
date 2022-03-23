@@ -1,18 +1,23 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
-import isURL from 'validator/lib/isURL';
+import isURL from "validator/lib/isURL";
 
 chrome.runtime.onInstalled.addListener((details) => {
-  chrome.alarms.create('fetchServer', { when: Date.now(), periodInMinutes: 10 })
-  chrome.alarms.create('serverSetting', { when: Date.now(), periodInMinutes: 60 })
+  chrome.alarms.create("fetchServer", {
+    when: Date.now(),
+    periodInMinutes: 240,
+  });
+  chrome.alarms.create("serverSetting", {
+    when: Date.now(),
+    periodInMinutes: 60,
+  });
 
-  if (details.reason === 'install') {
+  if (details.reason === "install") {
     chrome.tabs.create({
-      url: './pin.gif'
+      url: "./pin.gif",
     });
   }
-
-})
+});
 
 const getObjectFromLocalStorage = async function (key) {
   return new Promise<any[]>((resolve, reject) => {
@@ -31,39 +36,37 @@ async function fetchLocal(listype) {
   var localApprovedlist = await getObjectFromLocalStorage(listype);
   if (localApprovedlist != undefined) {
     return localApprovedlist;
-  }
-  else {
+  } else {
     return emptylist;
   }
 }
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-
-  if (msg.command.type === 'addToSafeList') {
+  if (msg.command.type === "addToSafeList") {
     addURL(msg.command.value, "approvedlist").then((result) => {
-      sendResponse(result)
+      sendResponse(result);
     });
-    return true
-  } else if (msg.command.type === 'addToBlockedList') {
+    return true;
+  } else if (msg.command.type === "addToBlockedList") {
     addURL(msg.command.value, "blockedlist").then((result) => {
-      sendResponse(result)
+      sendResponse(result);
     });
-    return true
+    return true;
   } else if (msg.command.type === "checkAddress") {
     run(msg.command.value).then((result) => {
-      sendResponse(result)
+      sendResponse(result);
     });
-    return true
+    return true;
   } else if (msg.command.type === "removeAddress") {
     removeURL(msg.command.value).then((result) => {
-      sendResponse(result)
-    })
-    return true
+      sendResponse(result);
+    });
+    return true;
   } else if (msg.command.type === "setNotification") {
-    chrome.storage.local.set({ "notificationBlocked": msg.command.value.block })
-    chrome.storage.local.set({ "notificationSafe": msg.command.value.safe })
-    
-    return true
+    chrome.storage.local.set({ notificationBlocked: msg.command.value.block });
+    chrome.storage.local.set({ notificationSafe: msg.command.value.safe });
+
+    return true;
   }
 });
 
@@ -71,13 +74,14 @@ async function removeURL(url) {
   var localApprovedlist = await fetchLocal("approvedlist");
   var localBlockedlist = await fetchLocal("blockedlist");
   if (localApprovedlist.includes(url)) {
-    localApprovedlist = localApprovedlist.filter(item => item !== url)
-    chrome.storage.local.set({ "approvedlist": localApprovedlist });
-    return 'removedSafe'
-  } if (localBlockedlist.includes(url)) {
-    localBlockedlist = localBlockedlist.filter(item => item !== url)
-    chrome.storage.local.set({ "blockedlist": localBlockedlist });
-    return 'removedBlocked'
+    localApprovedlist = localApprovedlist.filter((item) => item !== url);
+    chrome.storage.local.set({ approvedlist: localApprovedlist });
+    return "removedSafe";
+  }
+  if (localBlockedlist.includes(url)) {
+    localBlockedlist = localBlockedlist.filter((item) => item !== url);
+    chrome.storage.local.set({ blockedlist: localBlockedlist });
+    return "removedBlocked";
   }
 }
 
@@ -86,22 +90,19 @@ async function addURL(newURL, listtype) {
   var localBlockedlist = await fetchLocal("blockedlist");
   if (listtype == "approvedlist") {
     if (localApprovedlist.includes(newURL)) {
-      return 'existsSafe';
-    }
-    else {
+      return "existsSafe";
+    } else {
       localApprovedlist.push(newURL);
-      chrome.storage.local.set({ "approvedlist": localApprovedlist });
-      return 'addedSafe';
+      chrome.storage.local.set({ approvedlist: localApprovedlist });
+      return "addedSafe";
     }
-  }
-  else if (listtype == "blockedlist") {
+  } else if (listtype == "blockedlist") {
     if (localBlockedlist.includes(newURL)) {
-      return 'existsBlocked';
-    }
-    else {
+      return "existsBlocked";
+    } else {
       localBlockedlist.push(newURL);
-      chrome.storage.local.set({ "blockedlist": localBlockedlist });
-      return 'addedBlocked';
+      chrome.storage.local.set({ blockedlist: localBlockedlist });
+      return "addedBlocked";
     }
   }
 }
@@ -113,10 +114,10 @@ async function checkURL(currelhost) {
   var serverBlockedList = await fetchLocal("serverBlockedList");
 
   var results = {
-    "inUserApprovedlist": false,
-    "inUserBlockedlist": false,
-    "inServerApprovedlist": false,
-    "inServerBlockedlist": false
+    inUserApprovedlist: false,
+    inUserBlockedlist: false,
+    inServerApprovedlist: false,
+    inServerBlockedlist: false,
   };
 
   if (localApprovedlist.includes(currelhost)) {
@@ -134,15 +135,15 @@ async function checkURL(currelhost) {
 async function run(currentHost: string) {
   let results = await checkURL(currentHost);
   if (results["inUserApprovedlist"]) {
-    return 'safeLocal';
+    return "safeLocal";
   } else if (results["inServerApprovedlist"]) {
-    return 'safeServer';
+    return "safeServer";
   } else if (results["inUserBlockedlist"]) {
-    return 'blockedLocal';
+    return "blockedLocal";
   } else if (results["inServerBlockedlist"]) {
-    return 'blockedServer';
+    return "blockedServer";
   } else {
-    return 'notFound';
+    return "notFound";
   }
 }
 
@@ -153,7 +154,7 @@ const firebaseConfig = {
   storageBucket: process.env.FIREBASE_storageBucket,
   messagingSenderId: process.env.FIREBASE_messagingSenderId,
   appId: process.env.FIREBASE_appId,
-  measurementId: process.env.FIREBASE_measurementId
+  measurementId: process.env.FIREBASE_measurementId,
 };
 
 const app = initializeApp(firebaseConfig);
@@ -163,121 +164,133 @@ async function fetchServer(list) {
   const querySnapshot = await getDocs(collection(db, list));
   let urlList = [];
   querySnapshot.forEach((doc) => {
-    if (doc.data().URLs !== undefined){
+    if (doc.data().URLs !== undefined) {
       for (const elem of doc.data().URLs) {
         if (elem.URL !== undefined) {
-          urlList.push(elem.URL)
+          urlList.push(elem.URL);
         }
       }
     }
-  })
-  return urlList
+  });
+  return urlList;
+}
+
+function updateDurationSetting(doc, alarmName) {
+  if (doc.data().update !== undefined) {
+    if (doc.data().update === true) {
+      if (doc.data().duration !== undefined) {
+        chrome.alarms.clear(alarmName, () => {});
+        chrome.alarms.create(alarmName, {
+          periodInMinutes: doc.data().duration,
+        });
+      }
+    }
+  }
 }
 
 async function getServerSetting() {
-  const querySnapshot = await getDocs(collection(db, 'globalSetting'));
-
+  const querySnapshot = await getDocs(collection(db, "globalSetting"));
   querySnapshot.forEach((doc) => {
-    if (doc.id === 'storage'){
-      if(doc.data().update !== undefined) {
-        chrome.storage.local.set({ "updateServerStorage": doc.data().update });
+    if (doc.id === "storage") {
+      if (doc.data().update !== undefined) {
+        chrome.storage.local.set({ updateServerStorage: doc.data().update });
       }
+    } else if (doc.id === "storageDuration") {
+      updateDurationSetting(doc, "fetchServer");
+    } else if (doc.id === "updateDuration") {
+      updateDurationSetting(doc, "serverSetting");
     }
-  })
+  });
 }
 
 chrome.alarms.onAlarm.addListener((alarm) => {
-  if (alarm.name === 'serverSetting') {
-    getServerSetting()
+  if (alarm.name === "serverSetting") {
+    getServerSetting();
   }
-  if (alarm.name === 'fetchServer') {
-    cacheServer()
+  if (alarm.name === "fetchServer") {
+    cacheServer();
   }
-})
-
+});
 
 async function cacheServer() {
-
-  let serverUpdate = await getObjectFromLocalStorage('updateServerStorage')
-
-  if (serverUpdate === undefined) { // It will be undefined when it's installed first time
-    await getServerSetting()
-    serverUpdate = await getObjectFromLocalStorage('updateServerStorage')
+  let serverUpdate = await getObjectFromLocalStorage("updateServerStorage");
+  if (serverUpdate === undefined) {
+    // It will be undefined when it's installed first time
+    await getServerSetting();
+    serverUpdate = await getObjectFromLocalStorage("updateServerStorage");
   }
-
   if (serverUpdate !== undefined && serverUpdate) {
-    let safeUrl = await fetchServer('approved_links')
-    chrome.storage.local.set({ "serverApprovedList": safeUrl });
-    let blockedUrl = await fetchServer('malicious_links')
-    chrome.storage.local.set({ "serverBlockedList": blockedUrl });
+    let safeUrl = await fetchServer("approved_links");
+    chrome.storage.local.set({ serverApprovedList: safeUrl });
+    let blockedUrl = await fetchServer("malicious_links");
+    chrome.storage.local.set({ serverBlockedList: blockedUrl });
   }
 }
 
-
 function showNotification(command, info) {
-  if(command) {
-    chrome.notifications.create(info)
+  if (command) {
+    chrome.notifications.create(info);
   }
 }
 
 async function checkRunResult(result, url) {
-  if (result === 'safeLocal' || result === 'safeServer') {
-
+  if (result === "safeLocal" || result === "safeServer") {
     let notificationSetting = {
-      type: 'basic',
-      title: 'HexaTorch Safe Website',
+      type: "basic",
+      title: "HexaTorch Safe Website",
       iconUrl: "./icon-128.png",
       message: `${url} is a safe website in the database`,
-      priority: 2
-    }
+      priority: 2,
+    };
 
-    let notificationStatus = await getObjectFromLocalStorage('notificationSafe')
+    let notificationStatus = await getObjectFromLocalStorage(
+      "notificationSafe"
+    );
     showNotification(notificationStatus, notificationSetting);
 
-    chrome.action.setBadgeText({ text: 'SAFE' });
-    chrome.action.setBadgeBackgroundColor({ color: '#16BD00' });
-  } else if (result === 'blockedLocal' || result === 'blockedServer') {
-
+    chrome.action.setBadgeText({ text: "SAFE" });
+    chrome.action.setBadgeBackgroundColor({ color: "#16BD00" });
+  } else if (result === "blockedLocal" || result === "blockedServer") {
     let notificationSetting = {
-      type: 'basic',
-      title: 'HexaTorch Malicious Website',
+      type: "basic",
+      title: "HexaTorch Malicious Website",
       iconUrl: "./icon-128.png",
       message: `${url} is a malicious website in the database`,
-      priority: 2
-    }
+      priority: 2,
+    };
 
-    let notificationStatus = await getObjectFromLocalStorage('notificationBlocked')
+    let notificationStatus = await getObjectFromLocalStorage(
+      "notificationBlocked"
+    );
     showNotification(notificationStatus, notificationSetting);
 
-    chrome.action.setBadgeText({ text: 'BAD' });
-    chrome.action.setBadgeBackgroundColor({ color: '#FF0000' });
-  } else if (result === 'notFound') {
-    chrome.action.setBadgeText({ text: '' });
+    chrome.action.setBadgeText({ text: "BAD" });
+    chrome.action.setBadgeBackgroundColor({ color: "#FF0000" });
+  } else if (result === "notFound") {
+    chrome.action.setBadgeText({ text: "" });
   }
 }
 
 chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
+  chrome.action.setBadgeText({ text: "" });
   if (isURL(tab.url)) {
     var tmpURL = new URL(tab.url);
-    let url = tmpURL.hostname.toLowerCase()
+    let url = tmpURL.hostname.toLowerCase();
     run(url).then((result) => {
-      checkRunResult(result, url)
-    })
-  } else {
-    chrome.action.setBadgeText({ text: '' });
+      checkRunResult(result, url);
+    });
   }
 });
 
 chrome.tabs.onActivated.addListener(function (info) {
+  chrome.action.setBadgeText({ text: "" });
   chrome.tabs.get(info.tabId, function (tab) {
     if (isURL(tab.url)) {
       var tmpURL = new URL(tab.url);
-      let url = tmpURL.hostname.toLowerCase()
+      let url = tmpURL.hostname.toLowerCase();
       run(url).then((result) => {
-        checkRunResult(result, url)
-      })
-    } else {
-      chrome.action.setBadgeText({ text: '' });
+        checkRunResult(result, url);
+      });
     }
   });
 });
