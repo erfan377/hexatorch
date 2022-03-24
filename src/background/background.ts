@@ -42,6 +42,7 @@ async function fetchLocal(listype) {
 }
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  // logEvent(analytics, "notification_received");
   if (msg.command.type === "addToSafeList") {
     addURL(msg.command.value, "approvedlist").then((result) => {
       sendResponse(result);
@@ -158,6 +159,7 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+// const analytics = getAnalytics();
 const db = getFirestore();
 
 async function fetchServer(list) {

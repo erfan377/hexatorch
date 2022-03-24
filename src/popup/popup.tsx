@@ -4,8 +4,11 @@ import "./popup.css";
 import logo from "./logo.jpg";
 import { Button } from "../components/Button";
 import isURL from "validator/lib/isURL";
+import mixpanel from "mixpanel-browser";
 
 const NameForm = () => {
+  mixpanel.init(process.env.MIXPANEL_projectId);
+
   async function getGas() {
     let response = await fetch(
       `https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=${process.env.ETHERSCAN_apiKey}`
@@ -234,6 +237,7 @@ const NameForm = () => {
   }
 
   const addToDatabase = (action, address) => {
+    mixpanel.track("User Added", { command: action, addr: address });
     chrome.runtime.sendMessage(
       { command: { type: action, value: address } },
       (response) => {
