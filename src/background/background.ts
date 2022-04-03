@@ -1,5 +1,10 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, getDocs } from "firebase/firestore";
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  DocumentData,
+} from "firebase/firestore";
 import isURL from "validator/lib/isURL";
 
 chrome.runtime.onInstalled.addListener((details) => {
@@ -19,7 +24,7 @@ chrome.runtime.onInstalled.addListener((details) => {
   }
 });
 
-const getObjectFromLocalStorage = async function (key) {
+const getObjectFromLocalStorage = async function (key: string) {
   return new Promise<any[]>((resolve, reject) => {
     try {
       chrome.storage.local.get(key, function (value) {
@@ -31,9 +36,9 @@ const getObjectFromLocalStorage = async function (key) {
   });
 };
 
-async function fetchLocal(listype) {
+async function fetchLocal(listType: string) {
   var emptylist = [];
-  var localApprovedlist = await getObjectFromLocalStorage(listype);
+  var localApprovedlist = await getObjectFromLocalStorage(listType);
   if (localApprovedlist != undefined) {
     return localApprovedlist;
   } else {
@@ -70,7 +75,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   }
 });
 
-async function removeURL(url) {
+async function removeURL(url: string) {
   var localApprovedlist = await fetchLocal("approvedlist");
   var localBlockedlist = await fetchLocal("blockedlist");
   if (localApprovedlist.includes(url)) {
@@ -85,10 +90,10 @@ async function removeURL(url) {
   }
 }
 
-async function addURL(newURL, listtype) {
+async function addURL(newURL: string, listType: string) {
   var localApprovedlist = await fetchLocal("approvedlist");
   var localBlockedlist = await fetchLocal("blockedlist");
-  if (listtype == "approvedlist") {
+  if (listType == "approvedlist") {
     if (localApprovedlist.includes(newURL)) {
       return "existsSafe";
     } else {
@@ -96,7 +101,7 @@ async function addURL(newURL, listtype) {
       chrome.storage.local.set({ approvedlist: localApprovedlist });
       return "addedSafe";
     }
-  } else if (listtype == "blockedlist") {
+  } else if (listType == "blockedlist") {
     if (localBlockedlist.includes(newURL)) {
       return "existsBlocked";
     } else {
@@ -107,7 +112,7 @@ async function addURL(newURL, listtype) {
   }
 }
 
-async function checkURL(currelhost) {
+async function checkURL(currelhost: string) {
   var localApprovedlist = await fetchLocal("approvedlist");
   var localBlockedlist = await fetchLocal("blockedlist");
   var serverApprovedList = await fetchLocal("serverApprovedList");
@@ -160,8 +165,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore();
 
-async function fetchServer(list) {
-  const querySnapshot = await getDocs(collection(db, list));
+async function fetchServer(listType: string) {
+  const querySnapshot = await getDocs(collection(db, listType));
   let urlList = [];
   querySnapshot.forEach((doc) => {
     if (doc.data().URLs !== undefined) {
@@ -175,7 +180,7 @@ async function fetchServer(list) {
   return urlList;
 }
 
-function updateDurationSetting(doc, alarmName) {
+function updateDurationSetting(doc: DocumentData, alarmName: string) {
   if (doc.data().update !== undefined) {
     if (doc.data().update === true) {
       if (doc.data().duration !== undefined) {
@@ -233,7 +238,7 @@ function showNotification(command, info) {
   }
 }
 
-async function checkRunResult(result, url) {
+async function checkRunResult(result: string, url: string, tabNum: number) {
   if (result === "safeLocal" || result === "safeServer") {
     let notificationSetting = {
       type: "basic",
@@ -248,8 +253,8 @@ async function checkRunResult(result, url) {
     );
     showNotification(notificationStatus, notificationSetting);
 
-    chrome.action.setBadgeText({ text: "SAFE" });
-    chrome.action.setBadgeBackgroundColor({ color: "#16BD00" });
+    chrome.action.setBadgeText({ text: "SAFE", tabId: tabNum });
+    chrome.action.setBadgeBackgroundColor({ color: "#16BD00", tabId: tabNum });
   } else if (result === "blockedLocal" || result === "blockedServer") {
     let notificationSetting = {
       type: "basic",
@@ -264,36 +269,43 @@ async function checkRunResult(result, url) {
     );
     showNotification(notificationStatus, notificationSetting);
 
-    chrome.action.setBadgeText({ text: "BAD" });
-    chrome.action.setBadgeBackgroundColor({ color: "#FF0000" });
+    chrome.action.setBadgeText({ text: "BAD", tabId: tabNum });
+    chrome.action.setBadgeBackgroundColor({ color: "#FF0000", tabId: tabNum });
   } else if (result === "notFound") {
-    chrome.action.setBadgeText({ text: "" });
+    chrome.action.setBadgeText({ text: "", tabId: tabNum });
   }
 }
 
-chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
-  chrome.action.setBadgeText({ text: "" });
+chrome.tabs.onUpdated.addListener(function (tabNum, changeInfo, tab) {
   // In case webpages keep updating in the background
-  if (tab?.active === true) {
-    if (isURL(tab.url)) {
-      var tmpURL = new URL(tab.url);
-      let url = tmpURL.hostname.toLowerCase();
-      run(url).then((result) => {
-        checkRunResult(result, url);
-      });
+  if (tab.active === true) {
+    chrome.action.setBadgeText({ text: "", tabId: tabNum });
+    // depending on user interview we will change this
+    if (changeInfo.status === "complete") {
+      if (isURL(tab.url)) {
+        var tmpURL = new URL(tab.url);
+        let url = tmpURL.hostname.toLowerCase();
+        run(url).then((result) => {
+          checkRunResult(result, url, tabNum);
+        });
+      }
     }
   }
 });
 
 chrome.tabs.onActivated.addListener(function (info) {
-  chrome.action.setBadgeText({ text: "" });
   chrome.tabs.get(info.tabId, function (tab) {
-    if (isURL(tab.url)) {
-      var tmpURL = new URL(tab.url);
-      let url = tmpURL.hostname.toLowerCase();
-      run(url).then((result) => {
-        checkRunResult(result, url);
-      });
+    // In case webpages keep updating in the background
+    // not sure if we need it actually
+    if (tab.active === true) {
+      chrome.action.setBadgeText({ text: "", tabId: info.tabId });
+      if (isURL(tab.url)) {
+        var tmpURL = new URL(tab.url);
+        let url = tmpURL.hostname.toLowerCase();
+        run(url).then((result) => {
+          checkRunResult(result, url, info.tabId);
+        });
+      }
     }
   });
 });
