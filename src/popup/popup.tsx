@@ -7,6 +7,8 @@ import isURL from "validator/lib/isURL";
 
 const NameForm = () => {
   async function getGas() {
+    console.log("fg: get gas");
+
     let response = await fetch(
       `https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=${process.env.ETHERSCAN_apiKey}`
     );
@@ -19,6 +21,8 @@ const NameForm = () => {
     let ethUsd = responseJson.result.ethusd;
     let averagePrice = ((ethUsd * gasGwei) / 1000000000) * 21000;
     averagePrice = parseFloat(averagePrice.toFixed(2));
+    console.log("fg: get gas price", gasGwei);
+
     setGas({ gwei: gasGwei, usd: averagePrice });
   }
 
@@ -168,9 +172,12 @@ const NameForm = () => {
     }
     getGas();
     chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
+      console.log("fg: new tab check");
+
       let tmpurl = tabs[0].url;
       if (isURL(tmpurl)) {
         let tmp = new URL(tmpurl);
+        console.log("fg: new tab check", tmp.hostname);
         setAddressBar(tmp.hostname.toLowerCase());
         checkAddress(tmp.hostname.toLowerCase(), false);
       }
@@ -179,6 +186,8 @@ const NameForm = () => {
 
   function handleSubmit(event) {
     event.preventDefault();
+    console.log("fg: submit", event);
+
     if (isURL(addressBar)) {
       checkAddress(addressBar.toLowerCase(), true);
     } else {
@@ -187,9 +196,13 @@ const NameForm = () => {
   }
 
   function checkAddress(address, submission) {
+    console.log("fg: check address", address, submission);
+
     chrome.runtime.sendMessage(
       { command: { type: "checkAddress", value: address } },
       (response) => {
+        console.log("fg: check address respinse", response);
+
         if (response === "safeLocal") {
           setPage("safeLocal");
         } else if (response === "safeServer") {
@@ -206,6 +219,8 @@ const NameForm = () => {
   }
 
   function showPage() {
+    console.log("fg: show page", page);
+
     if (page === "main") {
       return mainpage();
     } else if (page === "addedSafe") {
@@ -234,6 +249,8 @@ const NameForm = () => {
   }
 
   const addToDatabase = (action, address) => {
+    console.log("fg: add to database", action, address);
+
     chrome.runtime.sendMessage(
       { command: { type: action, value: address } },
       (response) => {
@@ -252,6 +269,8 @@ const NameForm = () => {
     chrome.runtime.sendMessage(
       { command: { type: "removeAddress", value: addressBar } },
       (response) => {
+        console.log("fg: remove address", addressBar, response);
+
         if (response === "removedSafe" || response === "removedBlocked") {
           setPage("removed");
           return true;

@@ -42,6 +42,8 @@ async function fetchLocal(listype) {
 }
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  console.log("bg:msgg", msg.command.type, msg.command.value);
+
   if (msg.command.type === "addToSafeList") {
     addURL(msg.command.value, "approvedlist").then((result) => {
       sendResponse(result);
@@ -88,6 +90,9 @@ async function removeURL(url) {
 async function addURL(newURL, listtype) {
   var localApprovedlist = await fetchLocal("approvedlist");
   var localBlockedlist = await fetchLocal("blockedlist");
+  console.log("bg:add url approve list", localApprovedlist);
+  console.log("bg:add url commands", newURL, listtype);
+
   if (listtype == "approvedlist") {
     if (localApprovedlist.includes(newURL)) {
       return "existsSafe";
@@ -129,6 +134,8 @@ async function checkURL(currelhost) {
   } else if (serverBlockedList.includes(currelhost)) {
     results["inServerBlockedlist"] = true;
   }
+  console.log("bg:checkurl", results, currelhost);
+
   return results;
 }
 
@@ -216,12 +223,18 @@ async function cacheServer() {
   let serverUpdate = await getObjectFromLocalStorage("updateServerStorage");
   if (serverUpdate === undefined) {
     // It will be undefined when it's installed first time
+    console.log("bg: cache serve first time", serverUpdate);
+
     await getServerSetting();
     serverUpdate = await getObjectFromLocalStorage("updateServerStorage");
   }
   if (serverUpdate !== undefined && serverUpdate) {
+    console.log("bg: cache serve 2nd time", serverUpdate);
+
     let safeUrl = await fetchServer("approved_links");
     chrome.storage.local.set({ serverApprovedList: safeUrl });
+    console.log("bg: cache serve 2nd time safe", safeUrl);
+
     let blockedUrl = await fetchServer("malicious_links");
     chrome.storage.local.set({ serverBlockedList: blockedUrl });
   }
@@ -234,6 +247,8 @@ function showNotification(command, info) {
 }
 
 async function checkRunResult(result, url) {
+  console.log("bg: checkrunresult", result, url);
+
   if (result === "safeLocal" || result === "safeServer") {
     let notificationSetting = {
       type: "basic",
@@ -273,22 +288,64 @@ async function checkRunResult(result, url) {
 
 chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
   chrome.action.setBadgeText({ text: "" });
+  console.log("bg: on updated iddddd", tabId, changeInfo, tab);
+
+  chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
+    console.log("bg: query tabss", tabs);
+  });
+
+  chrome.windows.getCurrent(function (tabid) {
+    console.log("current tabid", tabid);
+  });
+
   if (isURL(tab.url)) {
+    console.log("bg: on updated is url", tab.url);
     var tmpURL = new URL(tab.url);
     let url = tmpURL.hostname.toLowerCase();
     run(url).then((result) => {
+      console.log("bg: on updated run result", result, url);
       checkRunResult(result, url);
     });
   }
 });
 
+async function getCurrentTab() {
+  let queryOptions = { active: true, currentWindow: true };
+  let [tab] = await chrome.tabs.query(queryOptions);
+  console.log("get current tab", tab);
+}
+
+chrome.tabs.onHighlighted.addListener(function (tabif) {
+  console.log("on highlighted", tabif);
+});
+
+chrome.windows.onFocusChanged.addListener(function (tabId, changeInfo) {
+  console.log("tab change foc", tabId, changeInfo);
+  getCurrentTab();
+});
+
+chrome.tabs.onZoomChange.addListener(function (tabId) {
+  console.log("on zoomes", tabId);
+});
+
+chrome.tabs.onAttached.addListener(function (tabId) {
+  console.log("on attached", tabId);
+});
+
+chrome.tabs.getCurrent(function (tabId) {
+  console.log("onother get current", tabId);
+});
+
 chrome.tabs.onActivated.addListener(function (info) {
+  console.log("bg: on activated", info);
   chrome.action.setBadgeText({ text: "" });
   chrome.tabs.get(info.tabId, function (tab) {
     if (isURL(tab.url)) {
+      console.log("bg: on activated is url", tab.url);
       var tmpURL = new URL(tab.url);
       let url = tmpURL.hostname.toLowerCase();
       run(url).then((result) => {
+        console.log("bg: on activated run result", result);
         checkRunResult(result, url);
       });
     }
