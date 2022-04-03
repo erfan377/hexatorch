@@ -315,6 +315,12 @@ async function getCurrentTab() {
   console.log("get current tab", tab);
 }
 
+async function getCurrentTab2() {
+  let queryOptions = { active: true, lastFocusedWindow: true };
+  let [tab] = await chrome.tabs.query(queryOptions);
+  console.log("get current tab2", tab);
+}
+
 chrome.tabs.onHighlighted.addListener(function (tabif) {
   console.log("on highlighted", tabif);
 });
@@ -322,6 +328,7 @@ chrome.tabs.onHighlighted.addListener(function (tabif) {
 chrome.windows.onFocusChanged.addListener(function (tabId, changeInfo) {
   console.log("tab change foc", tabId, changeInfo);
   getCurrentTab();
+  getCurrentTab2();
 });
 
 chrome.tabs.onZoomChange.addListener(function (tabId) {
