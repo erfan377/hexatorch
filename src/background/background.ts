@@ -280,15 +280,12 @@ chrome.tabs.onUpdated.addListener(function (tabNum, changeInfo, tab) {
   // In case webpages keep updating in the background
   if (tab.active === true) {
     chrome.action.setBadgeText({ text: "", tabId: tabNum });
-    // depending on user interview we will change this
-    if (changeInfo.status === "complete") {
-      if (isURL(tab.url)) {
-        var tmpURL = new URL(tab.url);
-        let url = tmpURL.hostname.toLowerCase();
-        run(url).then((result) => {
-          checkRunResult(result, url, tabNum);
-        });
-      }
+    if (isURL(tab.url)) {
+      var tmpURL = new URL(tab.url);
+      let url = tmpURL.hostname.toLowerCase();
+      run(url).then((result) => {
+        checkRunResult(result, url, tabNum);
+      });
     }
   }
 });
