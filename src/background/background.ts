@@ -273,12 +273,15 @@ async function checkRunResult(result, url) {
 
 chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
   chrome.action.setBadgeText({ text: "" });
-  if (isURL(tab.url)) {
-    var tmpURL = new URL(tab.url);
-    let url = tmpURL.hostname.toLowerCase();
-    run(url).then((result) => {
-      checkRunResult(result, url);
-    });
+  // In case webpages keep updating in the background
+  if (tab?.active === true) {
+    if (isURL(tab.url)) {
+      var tmpURL = new URL(tab.url);
+      let url = tmpURL.hostname.toLowerCase();
+      run(url).then((result) => {
+        checkRunResult(result, url);
+      });
+    }
   }
 });
 
