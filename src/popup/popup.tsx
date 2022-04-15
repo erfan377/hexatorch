@@ -7,19 +7,23 @@ import isURL from "validator/lib/isURL";
 
 const NameForm = () => {
   async function getGas() {
-    let response = await fetch(
-      `https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=${process.env.ETHERSCAN_apiKey}`
-    );
-    let responseJson = await response.json();
-    let gasGwei = responseJson.result.SafeGasPrice;
-    response = await fetch(
-      `https://api.etherscan.io/api?module=stats&action=ethprice&apikey=${process.env.ETHERSCAN_apiKey}`
-    );
-    responseJson = await response.json();
-    let ethUsd = responseJson.result.ethusd;
-    let averagePrice = ((ethUsd * gasGwei) / 1000000000) * 21000;
-    averagePrice = parseFloat(averagePrice.toFixed(2));
-    setGas({ gwei: gasGwei, usd: averagePrice });
+    try {
+      let response = await fetch(
+        `https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=${process.env.ETHERSCAN_apiKey}`
+      );
+      let responseJson = await response.json();
+      let gasGwei = responseJson.result.SafeGasPrice;
+      response = await fetch(
+        `https://api.etherscan.io/api?module=stats&action=ethprice&apikey=${process.env.ETHERSCAN_apiKey}`
+      );
+      responseJson = await response.json();
+      let ethUsd = responseJson.result.ethusd;
+      let averagePrice = ((ethUsd * gasGwei) / 1000000000) * 21000;
+      averagePrice = parseFloat(averagePrice.toFixed(2));
+      setGas({ gwei: gasGwei, usd: averagePrice });
+    } catch {
+      console.log("failed to fetch things");
+    }
   }
 
   const [addressBar, setAddressBar] = useState("");

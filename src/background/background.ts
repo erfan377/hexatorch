@@ -6,6 +6,8 @@ import {
   DocumentData,
 } from "firebase/firestore";
 import isURL from "validator/lib/isURL";
+import Web3 from "web3";
+import { AbiItem } from "web3-utils";
 
 chrome.runtime.onInstalled.addListener((details) => {
   chrome.alarms.create("fetchServer", {
@@ -19,20 +21,16 @@ chrome.runtime.onInstalled.addListener((details) => {
 
   if (details.reason === "install") {
     chrome.tabs.create({
-      url: "./pin.gif",
+      url: "./intro.html",
     });
   }
 });
 
 const getObjectFromLocalStorage = async function (key: string) {
   return new Promise<any[]>((resolve, reject) => {
-    try {
-      chrome.storage.local.get(key, function (value) {
-        resolve(value[key]);
-      });
-    } catch (ex) {
-      reject(ex);
-    }
+    chrome.storage.local.get(key, function (value) {
+      resolve(value[key]);
+    });
   });
 };
 
@@ -44,6 +42,80 @@ async function fetchLocal(listType: string) {
   } else {
     return emptylist;
   }
+}
+
+function getGas() {
+  const web3 = new Web3(
+    "https://kovan.infura.io/v3/9c2f86dd9f66447a86e5279a011d15c4"
+  );
+  const aggregatorV3InterfaceABI = [
+    {
+      inputs: [],
+      name: "decimals",
+      outputs: [{ internalType: "uint8", name: "", type: "uint8" }],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "description",
+      outputs: [{ internalType: "string", name: "", type: "string" }],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [{ internalType: "uint80", name: "_roundId", type: "uint80" }],
+      name: "getRoundData",
+      outputs: [
+        { internalType: "uint80", name: "roundId", type: "uint80" },
+        { internalType: "int256", name: "answer", type: "int256" },
+        { internalType: "uint256", name: "startedAt", type: "uint256" },
+        { internalType: "uint256", name: "updatedAt", type: "uint256" },
+        { internalType: "uint80", name: "answeredInRound", type: "uint80" },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "latestRoundData",
+      outputs: [
+        { internalType: "uint80", name: "roundId", type: "uint80" },
+        { internalType: "int256", name: "answer", type: "int256" },
+        { internalType: "uint256", name: "startedAt", type: "uint256" },
+        { internalType: "uint256", name: "updatedAt", type: "uint256" },
+        { internalType: "uint80", name: "answeredInRound", type: "uint80" },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "version",
+      outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+      stateMutability: "view",
+      type: "function",
+    },
+  ];
+  const addr = "0x9326BFA02ADD2366b30bacB125260Af641031331";
+  try {
+    console.log("start");
+    const priceFeed = new web3.eth.Contract(
+      aggregatorV3InterfaceABI as AbiItem[],
+      addr
+    );
+
+    console.log("end");
+  } catch (e) {
+    console.error(e);
+  }
+  // priceFeed.methods
+  //   .latestRoundData()
+  //   .call()
+  //   .then((roundData) => {
+  //     // Do something with roundData
+  //     console.log("Latest Round Data", roundData);
+  //   });
 }
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
@@ -70,7 +142,6 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   } else if (msg.command.type === "setNotification") {
     chrome.storage.local.set({ notificationBlocked: msg.command.value.block });
     chrome.storage.local.set({ notificationSafe: msg.command.value.safe });
-
     return true;
   }
 });
@@ -224,8 +295,10 @@ async function cacheServer() {
     await getServerSetting();
     serverUpdate = await getObjectFromLocalStorage("updateServerStorage");
   }
+  console.log("serverUpdate", serverUpdate);
   if (serverUpdate !== undefined && serverUpdate) {
     let safeUrl = await fetchServer("approved_links");
+    console.log("safeURL", safeUrl);
     chrome.storage.local.set({ serverApprovedList: safeUrl });
     let blockedUrl = await fetchServer("malicious_links");
     chrome.storage.local.set({ serverBlockedList: blockedUrl });
@@ -239,6 +312,11 @@ function showNotification(command, info) {
 }
 
 async function checkRunResult(result: string, url: string, tabNum: number) {
+  if (url === "opensea.io") {
+    if (result !== "safeServer") {
+      console.log("yess its happenign");
+    }
+  }
   if (result === "safeLocal" || result === "safeServer") {
     let notificationSetting = {
       type: "basic",
@@ -253,8 +331,16 @@ async function checkRunResult(result: string, url: string, tabNum: number) {
     );
     showNotification(notificationStatus, notificationSetting);
 
-    chrome.action.setBadgeText({ text: "SAFE", tabId: tabNum });
-    chrome.action.setBadgeBackgroundColor({ color: "#16BD00", tabId: tabNum });
+    chrome.action.setBadgeText({ text: "SAFE", tabId: tabNum }, () =>
+      showError()
+    );
+    chrome.action.setBadgeBackgroundColor(
+      {
+        color: "#16BD00",
+        tabId: tabNum,
+      },
+      () => showError()
+    );
   } else if (result === "blockedLocal" || result === "blockedServer") {
     let notificationSetting = {
       type: "basic",
@@ -269,17 +355,31 @@ async function checkRunResult(result: string, url: string, tabNum: number) {
     );
     showNotification(notificationStatus, notificationSetting);
 
-    chrome.action.setBadgeText({ text: "BAD", tabId: tabNum });
-    chrome.action.setBadgeBackgroundColor({ color: "#FF0000", tabId: tabNum });
+    chrome.action.setBadgeText({ text: "BAD", tabId: tabNum }, () =>
+      showError()
+    );
+    chrome.action.setBadgeBackgroundColor(
+      {
+        color: "#FF0000",
+        tabId: tabNum,
+      },
+      () => showError()
+    );
   } else if (result === "notFound") {
-    chrome.action.setBadgeText({ text: "", tabId: tabNum });
+    chrome.action.setBadgeText({ text: "", tabId: tabNum }, () => showError());
+  }
+}
+
+function showError() {
+  if (chrome.runtime.lastError) {
+    console.log(chrome.runtime.lastError.message);
   }
 }
 
 chrome.tabs.onUpdated.addListener(function (tabNum, changeInfo, tab) {
   // In case webpages keep updating in the background
   if (tab.active === true) {
-    chrome.action.setBadgeText({ text: "", tabId: tabNum });
+    chrome.action.setBadgeText({ text: "", tabId: tabNum }), () => showError();
     if (isURL(tab.url)) {
       var tmpURL = new URL(tab.url);
       let url = tmpURL.hostname.toLowerCase();
@@ -295,7 +395,9 @@ chrome.tabs.onActivated.addListener(function (info) {
     // In case webpages keep updating in the background
     // not sure if we need it actually
     if (tab.active === true) {
-      chrome.action.setBadgeText({ text: "", tabId: info.tabId });
+      chrome.action.setBadgeText({ text: "", tabId: info.tabId }, () =>
+        showError()
+      );
       if (isURL(tab.url)) {
         var tmpURL = new URL(tab.url);
         let url = tmpURL.hostname.toLowerCase();
