@@ -57,7 +57,7 @@ const NameForm = () => {
       <img className='lockmain' src={lock_unsecure}/>
       <div className='content'>
         <p className='report'>
-          This domain is now blocked in your browser.
+          This domain is now blocked on your browser.
         </p>
       </div>
       <div className='content'>
@@ -73,7 +73,7 @@ const NameForm = () => {
       <img className='lockmain' src={lock_secure}/>
       <div className='content'>
         <p className='report'>
-          This domain is now safelisted in your browser.
+          This domain is now safelisted on your browser.
         </p>
       </div>
       <div className='content'>
