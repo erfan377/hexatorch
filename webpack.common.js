@@ -1,3 +1,4 @@
+const webpack = require("webpack");
 const path = require("path");
 const CopyPlugin = require("copy-webpack-plugin");
 const HtmlPlugin = require("html-webpack-plugin");
@@ -39,6 +40,12 @@ module.exports = {
     },
   },
   plugins: [
+    new webpack.ProvidePlugin({
+      process: "process/browser",
+    }),
+    new webpack.ProvidePlugin({
+      Buffer: ["buffer", "Buffer"],
+    }),
     new CleanWebpackPlugin({
       cleanStaleWebpackAssets: false,
     }),

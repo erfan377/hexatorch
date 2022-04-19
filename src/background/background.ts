@@ -6,10 +6,10 @@ import {
   DocumentData,
 } from "firebase/firestore";
 import isURL from "validator/lib/isURL";
-import Web3 from "web3";
-import { AbiItem } from "web3-utils";
+import Contract from "web3-eth-contract";
 
 chrome.runtime.onInstalled.addListener((details) => {
+  // getGas();
   chrome.alarms.create("fetchServer", {
     when: Date.now(),
     periodInMinutes: 240,
@@ -44,79 +44,10 @@ async function fetchLocal(listType: string) {
   }
 }
 
-function getGas() {
-  const web3 = new Web3(
-    "https://kovan.infura.io/v3/9c2f86dd9f66447a86e5279a011d15c4"
-  );
-  const aggregatorV3InterfaceABI = [
-    {
-      inputs: [],
-      name: "decimals",
-      outputs: [{ internalType: "uint8", name: "", type: "uint8" }],
-      stateMutability: "view",
-      type: "function",
-    },
-    {
-      inputs: [],
-      name: "description",
-      outputs: [{ internalType: "string", name: "", type: "string" }],
-      stateMutability: "view",
-      type: "function",
-    },
-    {
-      inputs: [{ internalType: "uint80", name: "_roundId", type: "uint80" }],
-      name: "getRoundData",
-      outputs: [
-        { internalType: "uint80", name: "roundId", type: "uint80" },
-        { internalType: "int256", name: "answer", type: "int256" },
-        { internalType: "uint256", name: "startedAt", type: "uint256" },
-        { internalType: "uint256", name: "updatedAt", type: "uint256" },
-        { internalType: "uint80", name: "answeredInRound", type: "uint80" },
-      ],
-      stateMutability: "view",
-      type: "function",
-    },
-    {
-      inputs: [],
-      name: "latestRoundData",
-      outputs: [
-        { internalType: "uint80", name: "roundId", type: "uint80" },
-        { internalType: "int256", name: "answer", type: "int256" },
-        { internalType: "uint256", name: "startedAt", type: "uint256" },
-        { internalType: "uint256", name: "updatedAt", type: "uint256" },
-        { internalType: "uint80", name: "answeredInRound", type: "uint80" },
-      ],
-      stateMutability: "view",
-      type: "function",
-    },
-    {
-      inputs: [],
-      name: "version",
-      outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-      stateMutability: "view",
-      type: "function",
-    },
-  ];
-  const addr = "0x9326BFA02ADD2366b30bacB125260Af641031331";
-  try {
-    console.log("start");
-    const priceFeed = new web3.eth.Contract(
-      aggregatorV3InterfaceABI as AbiItem[],
-      addr
-    );
+// async function getGas() {
+//   //This is the hack I came up with to ignore typing
 
-    console.log("end");
-  } catch (e) {
-    console.error(e);
-  }
-  // priceFeed.methods
-  //   .latestRoundData()
-  //   .call()
-  //   .then((roundData) => {
-  //     // Do something with roundData
-  //     console.log("Latest Round Data", roundData);
-  //   });
-}
+// }
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.command.type === "addToSafeList") {
@@ -142,6 +73,103 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   } else if (msg.command.type === "setNotification") {
     chrome.storage.local.set({ notificationBlocked: msg.command.value.block });
     chrome.storage.local.set({ notificationSafe: msg.command.value.safe });
+    return true;
+  } else if (msg.command.type === "getGas") {
+    // getGas()
+    // console.log("gas2", getGas());
+    // .then((result) => {
+    //   console.log("yesss", result);
+    //   sendResponse(result);
+    // });
+    var ContractAny = Contract as any;
+    ContractAny.setProvider(
+      `https://mainnet.infura.io/v3/${process.env.INFURA_projectId}`
+    );
+
+    const aggregatorV3InterfaceABI = [
+      {
+        inputs: [],
+        name: "decimals",
+        outputs: [{ internalType: "uint8", name: "", type: "uint8" }],
+        stateMutability: "view",
+        type: "function",
+      },
+      {
+        inputs: [],
+        name: "description",
+        outputs: [{ internalType: "string", name: "", type: "string" }],
+        stateMutability: "view",
+        type: "function",
+      },
+      {
+        inputs: [{ internalType: "uint80", name: "_roundId", type: "uint80" }],
+        name: "getRoundData",
+        outputs: [
+          { internalType: "uint80", name: "roundId", type: "uint80" },
+          { internalType: "int256", name: "answer", type: "int256" },
+          { internalType: "uint256", name: "startedAt", type: "uint256" },
+          { internalType: "uint256", name: "updatedAt", type: "uint256" },
+          { internalType: "uint80", name: "answeredInRound", type: "uint80" },
+        ],
+        stateMutability: "view",
+        type: "function",
+      },
+      {
+        inputs: [],
+        name: "latestRoundData",
+        outputs: [
+          { internalType: "uint80", name: "roundId", type: "uint80" },
+          { internalType: "int256", name: "answer", type: "int256" },
+          { internalType: "uint256", name: "startedAt", type: "uint256" },
+          { internalType: "uint256", name: "updatedAt", type: "uint256" },
+          { internalType: "uint80", name: "answeredInRound", type: "uint80" },
+        ],
+        stateMutability: "view",
+        type: "function",
+      },
+      {
+        inputs: [],
+        name: "version",
+        outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+        stateMutability: "view",
+        type: "function",
+      },
+    ];
+    // const addr = "0x169E633A2D1E6c10dD91238Ba11c4A708dfEF37C";
+
+    // const priceFeed = new ContractAny(aggregatorV3InterfaceABI, addr);
+    // priceFeed.methods
+    //   .latestRoundData()
+    //   .call()
+    //   .then((roundData) => {
+    //     // Do something with roundData
+    //     sendResponse(roundData.answer / 1000000000);
+    //   });
+
+    const gweiAddr = "0x169E633A2D1E6c10dD91238Ba11c4A708dfEF37C";
+    const gasFeed = new ContractAny(aggregatorV3InterfaceABI, gweiAddr);
+    const priceAddr = "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419";
+    const priceFeed = new ContractAny(aggregatorV3InterfaceABI, priceAddr);
+    let results = { gwei: undefined, eth: undefined };
+    gasFeed.methods
+      .latestRoundData()
+      .call()
+      .then((roundData) => {
+        // Do something with roundData
+        results.gwei = roundData.answer / 1000000000;
+      })
+      .then(() => {
+        priceFeed.methods
+          .latestRoundData()
+          .call()
+          .then((roundData) => {
+            // Do something with roundData
+            results.eth = roundData.answer / 100000000;
+          })
+          .then(() => {
+            sendResponse(results);
+          });
+      });
     return true;
   }
 });
@@ -239,15 +267,15 @@ const db = getFirestore();
 async function fetchServer(listType: string) {
   const querySnapshot = await getDocs(collection(db, listType));
   let urlList = [];
-  querySnapshot.forEach((doc) => {
-    if (doc.data().URLs !== undefined) {
-      for (const elem of doc.data().URLs) {
-        if (elem.URL !== undefined) {
-          urlList.push(elem.URL);
-        }
-      }
-    }
-  });
+  // querySnapshot.forEach((doc) => {
+  //   if (doc.data().URLs !== undefined) {
+  //     for (const elem of doc.data().URLs) {
+  //       if (elem.URL !== undefined) {
+  //         urlList.push(elem.URL);
+  //       }
+  //     }
+  //   }
+  // });
   return urlList;
 }
 
