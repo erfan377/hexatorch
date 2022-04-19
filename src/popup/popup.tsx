@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import ReactDOM from 'react-dom'
 import './popup.css'
-import logo from "./logo.jpg";
+import lock from "./logo.jpg";
+import lock_unsecure from "./unsecure.jpg";
+import lock_secure from "./secure.jpg";
 import { Button } from "../components/Button";
 import isURL from 'validator/lib/isURL';
 
@@ -51,26 +53,32 @@ const NameForm = () => {
 
   function showApproveBlockedfn() {
     return (
+      <div>
+      <img className='lockmain' src={lock_unsecure}/>
       <div className='content'>
-        <div className='confirmationPage'>
-          <p className='address'>{addressBar} </p>
-          <h3 className='explanationNeutral'>Added to your blocklist</h3>
-          <p></p>
-          <Button onClick={handleRemoveButtonEvent}>Remove from blocked</Button>
-        </div>
+        <p className='report'>
+          This domain is now blocked in your browser.
+        </p>
+      </div>
+      <div className='content'>
+        <Button onClick={handleRemoveButtonEvent}>Remove from Blocklist</Button>
+      </div>
       </div>
     )
   }
 
   function showApproveSafefn() {
     return (
+      <div>
+      <img className='lockmain' src={lock_secure}/>
       <div className='content'>
-        <div className='confirmationPage'>
-          <h3 className='address'>{addressBar}</h3>
-          <h3 className='explanationGreen'>Added to your safelist!</h3>
-          <p></p>
-          <Button onClick={handleRemoveButtonEvent}>Remove from SafeList</Button>
-        </div>
+        <p className='report'>
+          This domain is now safelisted in your browser.
+        </p>
+      </div>
+      <div className='content'>
+        <Button onClick={handleRemoveButtonEvent}>Remove from Safelist</Button>
+      </div>
       </div>
     )
   }
@@ -89,49 +97,58 @@ const NameForm = () => {
 
   function showBlockedStateServer() {
     return (
+      <div>
+      <img className='lockmain' src={lock_unsecure}/>
       <div className='content'>
-        <div className='confirmationPage'>
-          <h3 className='address'>{addressBar}</h3>
-          <h3 className='explanationRed'>Address is on our blocklist.</h3>
-          <h3 className='explanationRed'>Proceed at your own risk.</h3>
-        </div>
+        <p className='report'>
+          This domain has been blocked by <strong>HexaTorch</strong>.
+        </p>
+      </div>
       </div>
     )
   }
 
   function showBlockedStateLocal() {
     return (
+      <div>
+      <img className='lockmain' src={lock_unsecure}/>
       <div className='content'>
-        <div className='confirmationPage'>
-          <h3 className='address'>{addressBar}</h3>
-          <h3 className='explanationRed'>This is on your blocklist</h3>
-          <p></p>
-          <Button onClick={handleRemoveButtonEvent}> Remove from Blocklist</Button>
-        </div>
+        <p className='report'>
+          This domain has been blocked by <strong>you</strong>.
+        </p>
+      </div>
+      <div className='content'>
+        <Button onClick={handleRemoveButtonEvent}> Remove from Blocklist</Button>
+      </div>
       </div>
     )
   }
 
   function showSafeStateServer() {
     return (
+      <div>
+      <img className='lockmain' src={lock_secure}/>
       <div className='content'>
-        <div className='confirmationPage'>
-          <h3 className='address'>{addressBar}</h3>
-          <h3 className='explanationGreen'>Address is on our safelist!</h3>
-        </div>
+        <p className='report'>
+          This domain has been <strong> verified by HexaTorch</strong>.
+        </p>
+      </div>
       </div>
     )
   }
 
   function showSafeStateLocal() {
     return (
+      <div>
+      <img className='lockmain' src={lock_secure}/>
       <div className='content'>
-        <div className='confirmationPage'>
-          <h3 className='address'>{addressBar}</h3>
-          <h3 className='explanationGreen'>This is on your safelist!</h3>
-          <p></p>
-          <Button onClick={handleRemoveButtonEvent}>Remove from Safelist</Button>
-        </div>
+        <p className='report'>
+          This website has been safelisted by <strong>you</strong>.
+        </p>
+      </div>
+      <div className='content'>
+        <Button onClick={handleRemoveButtonEvent}>Remove from Safelist</Button>
+      </div>
       </div>
     )
   }
@@ -224,7 +241,7 @@ const NameForm = () => {
     }
     else if (page === 'removed') {
 
-      return showRemovedfn()
+      return mainpage()
 
     } else if (page === 'notFound') {
 
@@ -279,11 +296,12 @@ const NameForm = () => {
   function mainpage() {
     return (
       <div>
+      <img className='lockmain' src={lock} />
         <form onSubmit={handleSubmit}>
           <div className="content">
             <input
               type="text"
-              placeholder="Type an address and press enter..."
+              placeholder="Type an address to safelist or blocklist..."
               value={addressBar}
               onChange={e => handleChange(e)}
             />
@@ -299,12 +317,6 @@ const NameForm = () => {
 
   return (
     <div className='body'>
-      <div className='header'>
-        <text className='gaspricetitle'> ETH Mid Gas Price: </text>
-        <br />
-        <text className='gasprice'>  {gas.gwei} Gwei, ${gas.usd} USD </text>
-      </div>
-      <img className='logo' src={logo} />
       <div className='mainPage'>
         {showPage()}
       </div>

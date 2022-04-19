@@ -215,7 +215,7 @@ function showNotification(command, info) {
   }
 }
 
-async function checkRunResult(result, url) {
+async function checkRunResult(result, url, id) {
   if (result === 'safeLocal' || result === 'safeServer') {
 
     let notificationSetting = {
@@ -228,9 +228,18 @@ async function checkRunResult(result, url) {
 
     let notificationStatus = await getObjectFromLocalStorage('notificationSafe')
     showNotification(notificationStatus, notificationSetting);
+    // const canvas = new OffscreenCanvas(16, 16);
+    // const context = canvas.getContext('2d');
+    // context.clearRect(0, 0, 16, 16);
+    // context.fillStyle = '#00FF00';  // Green
+    // context.fillRect(0, 0, 16, 16);
+    // const imageData = context.getImageData(0, 0, 16, 16);
+    
+    //chrome.action.setIcon({imageData: imageData});
 
-    chrome.action.setBadgeText({ text: 'SAFE' });
-    chrome.action.setBadgeBackgroundColor({ color: '#16BD00' });
+    chrome.action.setIcon({path : "./icon-secure.png"});
+    chrome.action.setBadgeText({ text: 'SECURE' });
+    //chrome.action.setBadgeBackgroundColor({"color": "green"});
   } else if (result === 'blockedLocal' || result === 'blockedServer') {
 
     let notificationSetting = {
@@ -243,9 +252,9 @@ async function checkRunResult(result, url) {
 
     let notificationStatus = await getObjectFromLocalStorage('notificationBlocked')
     showNotification(notificationStatus, notificationSetting);
-
-    chrome.action.setBadgeText({ text: 'BAD' });
-    chrome.action.setBadgeBackgroundColor({ color: '#FF0000' });
+    chrome.action.setIcon({tabId: id, path : './icon-secure.png'});
+    //chrome.action.setBadgeText({ text: 'BAD' });
+    //chrome.action.setBadgeBackgroundColor({ color: '#FF0000' });
   } else if (result === 'notFound') {
     chrome.action.setBadgeText({ text: '' });
   }
@@ -256,7 +265,7 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
     var tmpURL = new URL(tab.url);
     let url = tmpURL.hostname.toLowerCase()
     run(url).then((result) => {
-      checkRunResult(result, url)
+      checkRunResult(result, url, tabId)
     })
   } else {
     chrome.action.setBadgeText({ text: '' });
@@ -269,7 +278,7 @@ chrome.tabs.onActivated.addListener(function (info) {
       var tmpURL = new URL(tab.url);
       let url = tmpURL.hostname.toLowerCase()
       run(url).then((result) => {
-        checkRunResult(result, url)
+        checkRunResult(result, url, tab.id)
       })
     } else {
       chrome.action.setBadgeText({ text: '' });

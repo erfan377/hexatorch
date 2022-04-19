@@ -4,15 +4,15 @@
   "version": "1.0.0",
   "manifest_version": 3,
   "icons": {
-    "8": "icon-8.png",
-    "16": "icon-16.png",
-    "48": "icon-32.png",
-    "128": "icon-128.png"
+    "8": "icon-neutral.png",
+    "16": "icon-neutral.png",
+    "48": "icon-neutral.png",
+    "128": "icon-neutral.png"
   },
   "action": {
     "default_popup": "popup.html",
     "default_title": "React Extension",
-    "default_icon": "icon-128.png"
+    "default_icon": "icon-neutral.png"
   },
   "permissions": [
     "storage",
