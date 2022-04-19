@@ -155,10 +155,24 @@ const NameForm = () => {
 
   function showErrorType() {
     return (
+      <div>
       <div className='content'>
-        <div className='confirmationPage'>
-          <h3 className='address'>{addressBar}</h3>
-          <h3 className='explanationRed'>Not valid address</h3>
+          <h3>Not a valid address</h3>
+      </div>
+      <img className='lockmain' src={lock} />
+        <form onSubmit={handleSubmit}>
+          <div className="content">
+            <input
+              type="text"
+              placeholder="Type an address to safelist or blocklist..."
+              value={addressBar}
+              onChange={e => handleChange(e)}
+            />
+          </div>
+        </form>
+        <div className="content">
+          <Button onClick={() => handleAddButtonEvent('addToSafeList')} color="primary"> Add to Safelist</Button>
+          <Button onClick={() => handleAddButtonEvent('addToBlockedList')} color="secondary"> Add to Blocklist</Button>
         </div>
       </div>
     )
