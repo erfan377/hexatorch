@@ -247,19 +247,28 @@ async function checkRunResult(result: string, url: string, tabNum: number) {
       message: `${url} is a safe website in the database`,
       priority: 2,
     };
+    chrome.action.setIcon({
+      path: {
+        "128": "./logo_secure_128.png",
+      },
+      tabId: tabNum,
+    });
 
     let notificationStatus = await getObjectFromLocalStorage(
       "notificationSafe"
     );
     showNotification(notificationStatus, notificationSetting);
-
-    chrome.action.setBadgeText({ text: "SAFE", tabId: tabNum });
-    chrome.action.setBadgeBackgroundColor({ color: "#16BD00", tabId: tabNum });
   } else if (result === "blockedLocal" || result === "blockedServer") {
+    chrome.action.setIcon({
+      path: {
+        "128": "./logo_notsecure_128.png",
+      },
+      tabId: tabNum,
+    });
     let notificationSetting = {
       type: "basic",
       title: "HexaTorch Malicious Website",
-      iconUrl: "./logo_128.png",
+      iconUrl: "./logo_notsecure_128.png",
       message: `${url} is a malicious website in the database`,
       priority: 2,
     };
@@ -268,18 +277,19 @@ async function checkRunResult(result: string, url: string, tabNum: number) {
       "notificationBlocked"
     );
     showNotification(notificationStatus, notificationSetting);
-
-    chrome.action.setBadgeText({ text: "BAD", tabId: tabNum });
-    chrome.action.setBadgeBackgroundColor({ color: "#FF0000", tabId: tabNum });
   } else if (result === "notFound") {
-    chrome.action.setBadgeText({ text: "", tabId: tabNum });
+    chrome.action.setIcon({
+      path: {
+        "128": "./logo_neutral_128.png",
+      },
+      tabId: tabNum,
+    });
   }
 }
 
 chrome.tabs.onUpdated.addListener(function (tabNum, changeInfo, tab) {
   // In case webpages keep updating in the background
   if (tab.active === true) {
-    chrome.action.setBadgeText({ text: "", tabId: tabNum });
     if (isURL(tab.url)) {
       var tmpURL = new URL(tab.url);
       let url = tmpURL.hostname.toLowerCase();
@@ -295,7 +305,6 @@ chrome.tabs.onActivated.addListener(function (info) {
     // In case webpages keep updating in the background
     // not sure if we need it actually
     if (tab.active === true) {
-      chrome.action.setBadgeText({ text: "", tabId: info.tabId });
       if (isURL(tab.url)) {
         var tmpURL = new URL(tab.url);
         let url = tmpURL.hostname.toLowerCase();
