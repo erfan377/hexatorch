@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import logo from "./logo.jpg";
+import logo from "./logo.png";
 import "./options.css";
 
 const App: React.FC<{}> = () => {

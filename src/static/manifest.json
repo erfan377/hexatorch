@@ -4,23 +4,17 @@
   "version": "1.0.0",
   "manifest_version": 3,
   "icons": {
-    "8": "icon-neutral.png",
-    "16": "icon-neutral.png",
-    "48": "icon-neutral.png",
-    "128": "icon-neutral.png"
+    "16": "logo_16.png",
+    "32": "logo_32.png",
+    "64": "logo_64.png",
+    "128": "logo_128.png"
   },
   "action": {
     "default_popup": "popup.html",
-    "default_title": "React Extension",
-    "default_icon": "icon-neutral.png"
+    "default_title": "HexaTorch",
+    "default_icon": "logo_128.png"
   },
-  "permissions": [
-    "storage",
-    "activeTab",
-    "tabs",
-    "alarms",
-    "notifications"
-  ],
+  "permissions": ["storage", "activeTab", "tabs", "alarms", "notifications"],
   "options_page": "options.html",
   "background": {
     "service_worker": "background.js"
