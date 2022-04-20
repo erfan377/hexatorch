@@ -9,19 +9,14 @@ import isURL from "validator/lib/isURL";
 
 const NameForm = () => {
   async function getGas() {
-    let response = await fetch(
-      `https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=${process.env.ETHERSCAN_apiKey}`
-    );
-    let responseJson = await response.json();
-    let gasGwei = responseJson.result.SafeGasPrice;
-    response = await fetch(
-      `https://api.etherscan.io/api?module=stats&action=ethprice&apikey=${process.env.ETHERSCAN_apiKey}`
-    );
-    responseJson = await response.json();
-    let ethUsd = responseJson.result.ethusd;
-    let averagePrice = ((ethUsd * gasGwei) / 1000000000) * 21000;
-    averagePrice = parseFloat(averagePrice.toFixed(2));
-    setGas({ gwei: gasGwei, usd: averagePrice });
+    chrome.runtime.sendMessage({ command: { type: "getGas" } }, (response) => {
+      const averagePrice =
+        ((response.eth * response.gwei) / 1000000000) * 21000;
+      setGas({
+        gwei: response.gwei.toFixed(2),
+        usd: parseFloat(averagePrice.toFixed(2)),
+      });
+    });
   }
 
   const [addressBar, setAddressBar] = useState("");
@@ -347,6 +342,14 @@ const NameForm = () => {
 
   return (
     <div className="body">
+      <div className="header">
+        <text className="gaspricetitle"> Chainlink ETH Fast Gas Price: </text>
+        <br />
+        <text className="gasprice">
+          {" "}
+          {gas.gwei} Gwei, ${gas.usd} USD{" "}
+        </text>
+      </div>
       <div className="mainPage">{showPage()}</div>
     </div>
   );

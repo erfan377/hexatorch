@@ -6,8 +6,10 @@ import {
   DocumentData,
 } from "firebase/firestore";
 import isURL from "validator/lib/isURL";
+import Contract from "web3-eth-contract";
 
 chrome.runtime.onInstalled.addListener((details) => {
+  // getGas();
   chrome.alarms.create("fetchServer", {
     when: Date.now(),
     periodInMinutes: 240,
@@ -19,20 +21,16 @@ chrome.runtime.onInstalled.addListener((details) => {
 
   if (details.reason === "install") {
     chrome.tabs.create({
-      url: "./pin.gif",
+      url: "./intro.html",
     });
   }
 });
 
 const getObjectFromLocalStorage = async function (key: string) {
   return new Promise<any[]>((resolve, reject) => {
-    try {
-      chrome.storage.local.get(key, function (value) {
-        resolve(value[key]);
-      });
-    } catch (ex) {
-      reject(ex);
-    }
+    chrome.storage.local.get(key, function (value) {
+      resolve(value[key]);
+    });
   });
 };
 
@@ -44,6 +42,89 @@ async function fetchLocal(listType: string) {
   } else {
     return emptylist;
   }
+}
+
+function getGas(callback) {
+  var ContractAny = Contract as any;
+  ContractAny.setProvider(
+    `https://mainnet.infura.io/v3/${process.env.INFURA_projectId}`
+  );
+
+  const aggregatorV3InterfaceABI = [
+    {
+      inputs: [],
+      name: "decimals",
+      outputs: [{ internalType: "uint8", name: "", type: "uint8" }],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "description",
+      outputs: [{ internalType: "string", name: "", type: "string" }],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [{ internalType: "uint80", name: "_roundId", type: "uint80" }],
+      name: "getRoundData",
+      outputs: [
+        { internalType: "uint80", name: "roundId", type: "uint80" },
+        { internalType: "int256", name: "answer", type: "int256" },
+        { internalType: "uint256", name: "startedAt", type: "uint256" },
+        { internalType: "uint256", name: "updatedAt", type: "uint256" },
+        { internalType: "uint80", name: "answeredInRound", type: "uint80" },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "latestRoundData",
+      outputs: [
+        { internalType: "uint80", name: "roundId", type: "uint80" },
+        { internalType: "int256", name: "answer", type: "int256" },
+        { internalType: "uint256", name: "startedAt", type: "uint256" },
+        { internalType: "uint256", name: "updatedAt", type: "uint256" },
+        { internalType: "uint80", name: "answeredInRound", type: "uint80" },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "version",
+      outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+      stateMutability: "view",
+      type: "function",
+    },
+  ];
+
+  const gweiAddr = "0x169E633A2D1E6c10dD91238Ba11c4A708dfEF37C";
+  const gasFeed = new ContractAny(aggregatorV3InterfaceABI, gweiAddr);
+  const priceAddr = "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419";
+  const priceFeed = new ContractAny(aggregatorV3InterfaceABI, priceAddr);
+  let results = { gwei: undefined, eth: undefined };
+  gasFeed.methods
+    .latestRoundData()
+    .call()
+    .then((roundData) => {
+      // Do something with roundData
+      results.gwei = roundData.answer / 1000000000;
+    })
+    .then(() => {
+      priceFeed.methods
+        .latestRoundData()
+        .call()
+        .then((roundData) => {
+          // Do something with roundData
+          results.eth = roundData.answer / 100000000;
+        })
+        .then(() => {
+          callback(results);
+        });
+    });
+  //This is the hack I came up with to ignore typing
 }
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
@@ -70,7 +151,9 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   } else if (msg.command.type === "setNotification") {
     chrome.storage.local.set({ notificationBlocked: msg.command.value.block });
     chrome.storage.local.set({ notificationSafe: msg.command.value.safe });
-
+    return true;
+  } else if (msg.command.type === "getGas") {
+    getGas(sendResponse);
     return true;
   }
 });
@@ -224,8 +307,10 @@ async function cacheServer() {
     await getServerSetting();
     serverUpdate = await getObjectFromLocalStorage("updateServerStorage");
   }
+  console.log("serverUpdate", serverUpdate);
   if (serverUpdate !== undefined && serverUpdate) {
     let safeUrl = await fetchServer("approved_links");
+    console.log("safeURL", safeUrl);
     chrome.storage.local.set({ serverApprovedList: safeUrl });
     let blockedUrl = await fetchServer("malicious_links");
     chrome.storage.local.set({ serverBlockedList: blockedUrl });
@@ -239,6 +324,11 @@ function showNotification(command, info) {
 }
 
 async function checkRunResult(result: string, url: string, tabNum: number) {
+  if (url === "opensea.io") {
+    if (result !== "safeServer") {
+      console.log("yess its happenign");
+    }
+  }
   if (result === "safeLocal" || result === "safeServer") {
     let notificationSetting = {
       type: "basic",
