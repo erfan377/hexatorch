@@ -243,7 +243,7 @@ async function checkRunResult(result: string, url: string, tabNum: number) {
     let notificationSetting = {
       type: "basic",
       title: "HexaTorch Safe Website",
-      iconUrl: "./icon-128.png",
+      iconUrl: "./logo_secure_128.png",
       message: `${url} is a safe website in the database`,
       priority: 2,
     };
@@ -259,7 +259,7 @@ async function checkRunResult(result: string, url: string, tabNum: number) {
     let notificationSetting = {
       type: "basic",
       title: "HexaTorch Malicious Website",
-      iconUrl: "./icon-128.png",
+      iconUrl: "./logo_128.png",
       message: `${url} is a malicious website in the database`,
       priority: 2,
     };

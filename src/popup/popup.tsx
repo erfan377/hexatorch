@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 import "./popup.css";
-import logo from "./logo.jpg";
+import lock from "./logo.png";
+import lock_unsecure from "./unsecure.png";
+import lock_secure from "./secure.png";
 import { Button } from "../components/Button";
 import isURL from "validator/lib/isURL";
 
@@ -54,12 +56,15 @@ const NameForm = () => {
 
   function showApproveBlockedfn() {
     return (
-      <div className="content">
-        <div className="confirmationPage">
-          <p className="address">{addressBar} </p>
-          <h3 className="explanationNeutral">Added to your blocklist</h3>
-          <p></p>
-          <Button onClick={handleRemoveButtonEvent}>Remove from blocked</Button>
+      <div>
+        <img className="lockmain" src={lock_unsecure} />
+        <div className="content">
+          <p className="report">This domain is now blocked on your browser.</p>
+        </div>
+        <div className="content">
+          <Button onClick={handleRemoveButtonEvent}>
+            Remove from Blocklist
+          </Button>
         </div>
       </div>
     );
@@ -67,13 +72,16 @@ const NameForm = () => {
 
   function showApproveSafefn() {
     return (
-      <div className="content">
-        <div className="confirmationPage">
-          <h3 className="address">{addressBar}</h3>
-          <h3 className="explanationGreen">Added to your safelist!</h3>
-          <p></p>
+      <div>
+        <img className="lockmain" src={lock_secure} />
+        <div className="content">
+          <p className="report">
+            This domain is now safelisted on your browser.
+          </p>
+        </div>
+        <div className="content">
           <Button onClick={handleRemoveButtonEvent}>
-            Remove from SafeList
+            Remove from Safelist
           </Button>
         </div>
       </div>
@@ -95,11 +103,12 @@ const NameForm = () => {
 
   function showBlockedStateServer() {
     return (
-      <div className="content">
-        <div className="confirmationPage">
-          <h3 className="address">{addressBar}</h3>
-          <h3 className="explanationRed">Address is on our blocklist.</h3>
-          <h3 className="explanationRed">Proceed at your own risk.</h3>
+      <div>
+        <img className="lockmain" src={lock_unsecure} />
+        <div className="content">
+          <p className="report">
+            This domain has been blocked by <strong>HexaTorch</strong>.
+          </p>
         </div>
       </div>
     );
@@ -107,11 +116,14 @@ const NameForm = () => {
 
   function showBlockedStateLocal() {
     return (
-      <div className="content">
-        <div className="confirmationPage">
-          <h3 className="address">{addressBar}</h3>
-          <h3 className="explanationRed">This is on your blocklist</h3>
-          <p></p>
+      <div>
+        <img className="lockmain" src={lock_unsecure} />
+        <div className="content">
+          <p className="report">
+            This domain has been blocked by <strong>you</strong>.
+          </p>
+        </div>
+        <div className="content">
           <Button onClick={handleRemoveButtonEvent}>
             {" "}
             Remove from Blocklist
@@ -123,10 +135,12 @@ const NameForm = () => {
 
   function showSafeStateServer() {
     return (
-      <div className="content">
-        <div className="confirmationPage">
-          <h3 className="address">{addressBar}</h3>
-          <h3 className="explanationGreen">Address is on our safelist!</h3>
+      <div>
+        <img className="lockmain" src={lock_secure} />
+        <div className="content">
+          <p className="report">
+            This domain has been <strong> verified by HexaTorch</strong>.
+          </p>
         </div>
       </div>
     );
@@ -134,11 +148,14 @@ const NameForm = () => {
 
   function showSafeStateLocal() {
     return (
-      <div className="content">
-        <div className="confirmationPage">
-          <h3 className="address">{addressBar}</h3>
-          <h3 className="explanationGreen">This is on your safelist!</h3>
-          <p></p>
+      <div>
+        <img className="lockmain" src={lock_secure} />
+        <div className="content">
+          <p className="report">
+            This website has been safelisted by <strong>you</strong>.
+          </p>
+        </div>
+        <div className="content">
           <Button onClick={handleRemoveButtonEvent}>
             Remove from Safelist
           </Button>
@@ -149,10 +166,36 @@ const NameForm = () => {
 
   function showErrorType() {
     return (
-      <div className="content">
-        <div className="confirmationPage">
-          <h3 className="address">{addressBar}</h3>
-          <h3 className="explanationRed">Not valid address</h3>
+      <div>
+        <div className="content">
+          <h3>Not a valid address</h3>
+        </div>
+        <img className="lockmain" src={lock} />
+        <form onSubmit={handleSubmit}>
+          <div className="content">
+            <input
+              type="text"
+              placeholder="Type an address to safelist or blocklist..."
+              value={addressBar}
+              onChange={(e) => handleChange(e)}
+            />
+          </div>
+        </form>
+        <div className="content">
+          <Button
+            onClick={() => handleAddButtonEvent("addToSafeList")}
+            color="primary"
+          >
+            {" "}
+            Add to Safelist
+          </Button>
+          <Button
+            onClick={() => handleAddButtonEvent("addToBlockedList")}
+            color="secondary"
+          >
+            {" "}
+            Add to Blocklist
+          </Button>
         </div>
       </div>
     );
@@ -221,7 +264,7 @@ const NameForm = () => {
     } else if (page === "safeServer") {
       return showSafeStateServer();
     } else if (page === "removed") {
-      return showRemovedfn();
+      return mainpage();
     } else if (page === "notFound") {
       return showNotFoundfn();
     } else if (page === "errorAdding") {
@@ -271,11 +314,12 @@ const NameForm = () => {
   function mainpage() {
     return (
       <div>
+        <img className="lockmain" src={lock} />
         <form onSubmit={handleSubmit}>
           <div className="content">
             <input
               type="text"
-              placeholder="Type an address and press enter..."
+              placeholder="Type an address to safelist or blocklist..."
               value={addressBar}
               onChange={(e) => handleChange(e)}
             />
@@ -303,15 +347,6 @@ const NameForm = () => {
 
   return (
     <div className="body">
-      <div className="header">
-        <text className="gaspricetitle"> ETH Mid Gas Price: </text>
-        <br />
-        <text className="gasprice">
-          {" "}
-          {gas.gwei} Gwei, ${gas.usd} USD{" "}
-        </text>
-      </div>
-      <img className="logo" src={logo} />
       <div className="mainPage">{showPage()}</div>
     </div>
   );
