@@ -8,8 +8,86 @@ import {
 import isURL from "validator/lib/isURL";
 import Contract from "web3-eth-contract";
 
+let dev = false; // True: To not fetch from firestore
+let idb = null;
+
+function create_database() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open("server", 3);
+    request.onerror = function () {
+      console.log("Problem opening DB.");
+    };
+
+    request.onupgradeneeded = function () {
+      idb = request.result;
+      let objectStore = idb.createObjectStore("serverApprovedList", {
+        keyPath: "url",
+      });
+
+      idb.createObjectStore("serverBlockedList", {
+        keyPath: "url",
+      });
+      objectStore.transaction.oncomplete = function () {
+        resolve(idb);
+      };
+    };
+
+    request.onsuccess = function () {
+      idb = request.result;
+      resolve(idb);
+      idb.onerror = function () {
+        console.log("FAILED TO OPEN DB.");
+      };
+    };
+  });
+}
+
+function insert_records(record, database) {
+  if (idb) {
+    return new Promise((resolve, reject) => {
+      const insert_transaction = idb.transaction(database, "readwrite");
+      const objectStore = insert_transaction.objectStore(database);
+
+      insert_transaction.oncomplete = function () {
+        resolve(true);
+      };
+
+      insert_transaction.onerror = function () {
+        resolve(false);
+      };
+
+      record.forEach((doc) => {
+        let request = objectStore.add(doc);
+
+        request.onsuccess = function () {};
+      });
+    });
+  }
+}
+
+function get_record(url, database) {
+  if (idb) {
+    return new Promise((resolve, reject) => {
+      const get_transaction = idb.transaction(database, "readonly");
+      const objectStore = get_transaction.objectStore(database);
+
+      get_transaction.oncomplete = function () {};
+
+      get_transaction.onerror = function () {};
+
+      let get_request = objectStore.get(url);
+
+      get_request.onsuccess = function (event) {
+        if (event.target.result !== undefined) {
+          resolve({ status: true, data: event.target.result });
+        }
+        resolve({ status: false, data: event.target.result });
+      };
+    });
+  }
+}
+
 chrome.runtime.onInstalled.addListener((details) => {
-  // getGas();
   chrome.alarms.create("fetchServer", {
     when: Date.now(),
     periodInMinutes: 240,
@@ -45,6 +123,7 @@ async function fetchLocal(listType: string) {
 }
 
 function getGas(callback) {
+  //This is the hack I came up with to ignore typing
   var ContractAny = Contract as any;
   ContractAny.setProvider(
     `https://mainnet.infura.io/v3/${process.env.INFURA_projectId}`
@@ -124,7 +203,6 @@ function getGas(callback) {
           callback(results);
         });
     });
-  //This is the hack I came up with to ignore typing
 }
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
@@ -198,24 +276,23 @@ async function addURL(newURL: string, listType: string) {
 async function checkURL(currelhost: string) {
   var localApprovedlist = await fetchLocal("approvedlist");
   var localBlockedlist = await fetchLocal("blockedlist");
-  var serverApprovedList = await fetchLocal("serverApprovedList");
-  var serverBlockedList = await fetchLocal("serverBlockedList");
 
   var results = {
     inUserApprovedlist: false,
     inUserBlockedlist: false,
-    inServerApprovedlist: false,
-    inServerBlockedlist: false,
   };
 
+  await get_record(currelhost, "serverApprovedList").then((res) => {
+    results["inServerApprovedlist"] = res["status"];
+  });
+
+  await get_record(currelhost, "serverBlockedList").then((res) => {
+    results["inServerBlockedlist"] = res["status"];
+  });
   if (localApprovedlist.includes(currelhost)) {
     results["inUserApprovedlist"] = true;
   } else if (localBlockedlist.includes(currelhost)) {
     results["inUserBlockedlist"] = true;
-  } else if (serverApprovedList.includes(currelhost)) {
-    results["inServerApprovedlist"] = true;
-  } else if (serverBlockedList.includes(currelhost)) {
-    results["inServerBlockedlist"] = true;
   }
   return results;
 }
@@ -251,15 +328,20 @@ const db = getFirestore();
 async function fetchServer(listType: string) {
   const querySnapshot = await getDocs(collection(db, listType));
   let urlList = [];
-  querySnapshot.forEach((doc) => {
-    if (doc.data().URLs !== undefined) {
-      for (const elem of doc.data().URLs) {
-        if (elem.URL !== undefined) {
-          urlList.push(elem.URL);
+  if (dev === false) {
+    querySnapshot.forEach((doc) => {
+      if (doc.data().URLs !== undefined) {
+        for (const elem of doc.data().URLs) {
+          if (elem.URL !== undefined) {
+            urlList.push({
+              url: elem.URL,
+              name: doc.id,
+            });
+          }
         }
       }
-    }
-  });
+    });
+  }
   return urlList;
 }
 
@@ -307,15 +389,21 @@ async function cacheServer() {
     await getServerSetting();
     serverUpdate = await getObjectFromLocalStorage("updateServerStorage");
   }
-  console.log("serverUpdate", serverUpdate);
-  if (serverUpdate !== undefined && serverUpdate) {
+  if (true) {
     let safeUrl = await fetchServer("approved_links");
-    console.log("safeURL", safeUrl);
-    chrome.storage.local.set({ serverApprovedList: safeUrl });
     let blockedUrl = await fetchServer("malicious_links");
-    chrome.storage.local.set({ serverBlockedList: blockedUrl });
+    var req = indexedDB.deleteDatabase("server");
+    req.onsuccess = async function () {
+      let promise = create_database();
+      promise.then(() => {
+        insert_records(safeUrl, "serverApprovedList");
+        insert_records(blockedUrl, "serverBlockedList");
+      });
+    };
   }
 }
+
+chrome.runtime.onUpdateAvailable.addListener(function () {});
 
 function showNotification(command, info) {
   if (command) {
@@ -324,11 +412,6 @@ function showNotification(command, info) {
 }
 
 async function checkRunResult(result: string, url: string, tabNum: number) {
-  if (url === "opensea.io") {
-    if (result !== "safeServer") {
-      console.log("yess its happenign");
-    }
-  }
   if (result === "safeLocal" || result === "safeServer") {
     let notificationSetting = {
       type: "basic",
