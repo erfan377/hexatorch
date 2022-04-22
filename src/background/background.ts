@@ -219,7 +219,6 @@ async function checkURL(currelhost: string) {
       }
     });
     if (urls.length > 0) {
-      console.log("sending", urls);
       return { command: "blockedServer", msg: urls };
     } else {
       return { command: "blockedServer", msg: [] };
@@ -307,7 +306,6 @@ async function cacheServer() {
     await getServerSetting();
     serverUpdate = await getObjectFromLocalStorage("updateServerStorage");
   }
-  console.log("serverUpdate", serverUpdate);
   if (serverUpdate !== undefined && serverUpdate) {
     let safeUrl = await fetchServer("approved_links");
     chrome.storage.local.set({ serverApprovedList: safeUrl });
@@ -368,22 +366,18 @@ async function checkRunResult(result, url: string, tabNum: number) {
       "notificationBlocked"
     );
     showNotification(notificationStatus, notificationSetting);
-
     var localCache = await fetchLocal("cache");
-    console.log("localCache", localCache);
     let badUrl = "https://" + url;
-    if (localCache[badUrl] === true) {
-      // console.log("going in?");
-      // chrome.tabs.update({
-      //   url: badUrl,
-      // });
-    } else {
-      console.log("badUrl", badUrl);
+    if (localCache[badUrl] !== true) {
+      let b = "";
+      result["msg"].forEach((address) => (b += address + ","));
+      console.log(b);
+      b = b.substring(0, b.length - 1);
       chrome.tabs.update({
         url:
           chrome.runtime.getURL("phish.html") +
           "?real=" +
-          (result["msg"].length > 0 ? result["msg"][0] : "null") +
+          (result["msg"].length > 0 ? b : "null") +
           "&proceed=" +
           badUrl,
       });

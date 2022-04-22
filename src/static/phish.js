@@ -2,11 +2,20 @@ let params = new URL(document.location).searchParams;
 let real = params.get("real");
 let proceed = params.get("proceed");
 
-if (real === "null") document.getElementById("real").hidden = true;
-document.getElementById("real").href = `https://${real}`;
-document.getElementById("real").innerText = "Go to " + real + " (safe)";
-document.getElementById("proceed").href = proceed;
+console.log("relm", real);
+if (real === "null") {
+  document.getElementById("real").hidden = true;
+} else {
+  real.split(",").forEach(function (e) {
+    console.log("e", e);
+    let real = document.createElement("a");
+    real.href = `https://${e}`;
+    real.innerText = "Go to " + e + " (safe)";
+    document.body.appendChild(real);
+  });
+}
 
+document.getElementById("proceed").href = proceed;
 document.getElementById("proceed").addEventListener("click", () => {
   console.log("cklicked it ");
   chrome.runtime.sendMessage({

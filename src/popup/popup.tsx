@@ -99,9 +99,8 @@ const NameForm = () => {
 
   function showErrorRemovefn() {}
 
-  function openSupport(website) {
-    const webb = "https://" + website;
-    chrome.tabs.create({ url: webb });
+  function openLink(website) {
+    chrome.tabs.create({ url: website });
   }
 
   function showBlockedStateServer() {
@@ -114,15 +113,18 @@ const NameForm = () => {
           </p>
           <div>
             {correctAddress.map((address) => {
-              console.log(address);
+              const link = "https://" + address;
               return (
                 <span
                   onClick={() => {
-                    openSupport(address);
+                    openLink(link);
                   }}
                 >
-                  Visit <span className="link">{address}</span> for correct
-                  website.
+                  Visit{" "}
+                  <a href={link} className="link">
+                    {address}
+                  </a>{" "}
+                  for correct website.
                 </span>
               );
             })}
@@ -370,6 +372,27 @@ const NameForm = () => {
     );
   }
 
+  function contact() {
+    return (
+      <div>
+        <p>
+          Got Feedback? Tweet
+          <a
+            href="https://twitter.com/intent/tweet?screen_name=hexatorch&ref_src=twsrc%5Etfw"
+            className="link"
+            onClick={() => {
+              openLink(
+                "https://twitter.com/intent/tweet?screen_name=hexatorch&ref_src=twsrc%5Etfw"
+              );
+            }}
+          >
+            @HexaTorch
+          </a>
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="body">
       <div className="header">
@@ -381,6 +404,7 @@ const NameForm = () => {
         </text>
       </div>
       <div className="mainPage">{showPage()}</div>
+      <div className="contacts">{contact()}</div>
     </div>
   );
 };
