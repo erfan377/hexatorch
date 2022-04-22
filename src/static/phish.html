@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Phishing Detected</title>
+    <style>
+      .center {
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        width: 25%;
+        margin: auto;
+        text-align: center;
+      }
+      .row {
+        flex-direction: row;
+      }
+      .column {
+        display: flex;
+        flex-direction: column;
+      }
+      .danger {
+        color: red;
+        margin-left: 20px;
+      }
+      .options {
+        font-size: 18px;
+      }
+    </style>
+    <link rel="icon" href="logo_16.png" type="image/x-icon" />
+  </head>
+  <body>
+    <div class="center">
+      <img src="./logo_notsecure_128.png" />
+      <h1>HexaTorch Warning</h1>
+      <h1>Phishing Detected</h1>
+      <p id="reason"></p>
+      <div class="row options">
+        <a id="real" href=""></a>
+        <a class="danger" id="proceed" href="">Proceed anyway (danger)</a>
+      </div>
+    </div>
+    <script src="phish.js"></script>
+  </body>
+</html>

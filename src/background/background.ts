@@ -154,6 +154,9 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     getGas(sendResponse);
     return true;
   } else if (msg.command.type === "proceedAnyway") {
+    let cache = {};
+    cache[msg.command.value] = true;
+    chrome.storage.local.set({ cache: cache });
     return true;
   }
 });
@@ -200,6 +203,7 @@ async function checkURL(currelhost: string) {
   var localBlockedlist = await fetchLocal("blockedlist");
   var serverApprovedList = await fetchLocal("serverApprovedList");
   var serverBlockedList = await fetchLocal("serverBlockedList");
+  var localCache = await fetchLocal("cache");
 
   if (localApprovedlist.includes(currelhost)) {
     return { command: "safeLocal", msg: null };
@@ -207,7 +211,7 @@ async function checkURL(currelhost: string) {
     return { command: "blockedLocal", msg: null };
   } else if (currelhost in serverApprovedList) {
     return { command: "safeServer", msg: null };
-  } else if (currelhost in serverBlockedList) {
+  } else if (currelhost in serverBlockedList || localCache[currelhost]) {
     let urls = [];
     Object.entries(serverApprovedList).forEach((item) => {
       if (item[1] === serverBlockedList[currelhost]) {
@@ -318,6 +322,10 @@ function showNotification(command, info) {
   }
 }
 
+chrome.windows.onFocusChanged.addListener(() => {
+  chrome.storage.local.set({ cache: [] });
+});
+
 async function checkRunResult(result, url: string, tabNum: number) {
   if (result["command"] === "safeLocal" || result["command"] === "safeServer") {
     let notificationSetting = {
@@ -360,15 +368,26 @@ async function checkRunResult(result, url: string, tabNum: number) {
       "notificationBlocked"
     );
     showNotification(notificationStatus, notificationSetting);
-    const badUrl = "https://" + url;
-    chrome.tabs.update({
-      url:
-        chrome.runtime.getURL("phish.html") +
-        "?real=" +
-        (result["msg"].length > 0 ? result["msg"][0] : "null") +
-        "&proceed=" +
-        { badUrl },
-    });
+
+    var localCache = await fetchLocal("cache");
+    console.log("localCache", localCache);
+    let badUrl = "https://" + url;
+    if (localCache[badUrl] === true) {
+      // console.log("going in?");
+      // chrome.tabs.update({
+      //   url: badUrl,
+      // });
+    } else {
+      console.log("badUrl", badUrl);
+      chrome.tabs.update({
+        url:
+          chrome.runtime.getURL("phish.html") +
+          "?real=" +
+          (result["msg"].length > 0 ? result["msg"][0] : "null") +
+          "&proceed=" +
+          badUrl,
+      });
+    }
   } else if (result === "notFound") {
     chrome.action.setIcon({
       path: {
