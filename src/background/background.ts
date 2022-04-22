@@ -153,6 +153,8 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   } else if (msg.command.type === "getGas") {
     getGas(sendResponse);
     return true;
+  } else if (msg.command.type === "proceedAnyway") {
+    return true;
   }
 });
 
@@ -316,13 +318,8 @@ function showNotification(command, info) {
   }
 }
 
-async function checkRunResult(result: string, url: string, tabNum: number) {
-  if (url === "opensea.io") {
-    if (result !== "safeServer") {
-      console.log("yess its happenign");
-    }
-  }
-  if (result === "safeLocal" || result === "safeServer") {
+async function checkRunResult(result, url: string, tabNum: number) {
+  if (result["command"] === "safeLocal" || result["command"] === "safeServer") {
     let notificationSetting = {
       type: "basic",
       title: "HexaTorch Safe Website",
@@ -341,7 +338,10 @@ async function checkRunResult(result: string, url: string, tabNum: number) {
       "notificationSafe"
     );
     showNotification(notificationStatus, notificationSetting);
-  } else if (result === "blockedLocal" || result === "blockedServer") {
+  } else if (
+    result["command"] === "blockedLocal" ||
+    result["command"] === "blockedServer"
+  ) {
     chrome.action.setIcon({
       path: {
         "128": "./logo_notsecure_128.png",
@@ -360,6 +360,15 @@ async function checkRunResult(result: string, url: string, tabNum: number) {
       "notificationBlocked"
     );
     showNotification(notificationStatus, notificationSetting);
+    const badUrl = "https://" + url;
+    chrome.tabs.update({
+      url:
+        chrome.runtime.getURL("phish.html") +
+        "?real=" +
+        (result["msg"].length > 0 ? result["msg"][0] : "null") +
+        "&proceed=" +
+        { badUrl },
+    });
   } else if (result === "notFound") {
     chrome.action.setIcon({
       path: {
@@ -377,7 +386,7 @@ chrome.tabs.onUpdated.addListener(function (tabNum, changeInfo, tab) {
       var tmpURL = new URL(tab.url);
       let url = tmpURL.hostname.toLowerCase();
       checkURL(url).then((result) => {
-        checkRunResult(result["command"], url, tabNum);
+        checkRunResult(result, url, tabNum);
       });
     }
   }
@@ -392,7 +401,7 @@ chrome.tabs.onActivated.addListener(function (info) {
         var tmpURL = new URL(tab.url);
         let url = tmpURL.hostname.toLowerCase();
         checkURL(url).then((result) => {
-          checkRunResult(result["command"], url, info.tabId);
+          checkRunResult(result, url, info.tabId);
         });
       }
     }
