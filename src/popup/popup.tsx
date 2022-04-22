@@ -22,6 +22,7 @@ const NameForm = () => {
   const [addressBar, setAddressBar] = useState("");
   const [page, setPage] = useState("main");
   const [gas, setGas] = useState({ gwei: 0, usd: 0 });
+  const [correctAddress, setCorrectAddress] = useState([]);
 
   function handleChange(event) {
     event.preventDefault();
@@ -96,6 +97,13 @@ const NameForm = () => {
     );
   }
 
+  function showErrorRemovefn() {}
+
+  function openSupport(website) {
+    const webb = "https://" + website;
+    chrome.tabs.create({ url: webb });
+  }
+
   function showBlockedStateServer() {
     return (
       <div>
@@ -104,6 +112,21 @@ const NameForm = () => {
           <p className="report">
             This domain has been blocked by <strong>HexaTorch</strong>.
           </p>
+          <div>
+            {correctAddress.map((address) => {
+              console.log(address);
+              return (
+                <span
+                  onClick={() => {
+                    openSupport(address);
+                  }}
+                >
+                  Visit <span className="link">{address}</span> for correct
+                  website.
+                </span>
+              );
+            })}
+          </div>
         </div>
       </div>
     );
@@ -228,15 +251,16 @@ const NameForm = () => {
     chrome.runtime.sendMessage(
       { command: { type: "checkAddress", value: address } },
       (response) => {
-        if (response === "safeLocal") {
+        if (response["command"] === "safeLocal") {
           setPage("safeLocal");
-        } else if (response === "safeServer") {
+        } else if (response["command"] === "safeServer") {
           setPage("safeServer");
-        } else if (response === "blockedLocal") {
+        } else if (response["command"] === "blockedLocal") {
           setPage("blockedLocal");
-        } else if (response === "blockedServer") {
+        } else if (response["command"] === "blockedServer") {
           setPage("blockedServer");
-        } else if (response === "notFound" && submission == true) {
+          setCorrectAddress(response["msg"]);
+        } else if (response["command"] === "notFound" && submission == true) {
           setPage("notFound");
         }
       }
@@ -275,11 +299,14 @@ const NameForm = () => {
     chrome.runtime.sendMessage(
       { command: { type: action, value: address } },
       (response) => {
-        if (response === "existsSafe" || response === "existsBlocked") {
+        if (
+          response["command"] === "existsSafe" ||
+          response["command"] === "existsBlocked"
+        ) {
           setPage("errorAdding");
-        } else if (response === "addedSafe") {
+        } else if (response["command"] === "addedSafe") {
           setPage("addedSafe");
-        } else if (response === "addedBlocked") {
+        } else if (response["command"] === "addedBlocked") {
           setPage("addedBlocked");
         }
       }
@@ -290,7 +317,10 @@ const NameForm = () => {
     chrome.runtime.sendMessage(
       { command: { type: "removeAddress", value: addressBar } },
       (response) => {
-        if (response === "removedSafe" || response === "removedBlocked") {
+        if (
+          response["command"] === "removedSafe" ||
+          response["command"] === "removedBlocked"
+        ) {
           setPage("removed");
           return true;
         }

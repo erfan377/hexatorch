@@ -9,7 +9,6 @@ import isURL from "validator/lib/isURL";
 import Contract from "web3-eth-contract";
 
 chrome.runtime.onInstalled.addListener((details) => {
-  // getGas();
   chrome.alarms.create("fetchServer", {
     when: Date.now(),
     periodInMinutes: 240,
@@ -45,7 +44,7 @@ async function fetchLocal(listType: string) {
 }
 
 function getGas(callback) {
-  var ContractAny = Contract as any;
+  var ContractAny = Contract as any; //To fix typing issue
   ContractAny.setProvider(
     `https://mainnet.infura.io/v3/${process.env.INFURA_projectId}`
   );
@@ -104,7 +103,7 @@ function getGas(callback) {
   const gasFeed = new ContractAny(aggregatorV3InterfaceABI, gweiAddr);
   const priceAddr = "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419";
   const priceFeed = new ContractAny(aggregatorV3InterfaceABI, priceAddr);
-  let results = { gwei: undefined, eth: undefined };
+  let results = { gwei: null, eth: null };
   gasFeed.methods
     .latestRoundData()
     .call()
@@ -124,7 +123,6 @@ function getGas(callback) {
           callback(results);
         });
     });
-  //This is the hack I came up with to ignore typing
 }
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
@@ -139,7 +137,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     });
     return true;
   } else if (msg.command.type === "checkAddress") {
-    run(msg.command.value).then((result) => {
+    checkURL(msg.command.value).then((result) => {
       sendResponse(result);
     });
     return true;
@@ -164,12 +162,12 @@ async function removeURL(url: string) {
   if (localApprovedlist.includes(url)) {
     localApprovedlist = localApprovedlist.filter((item) => item !== url);
     chrome.storage.local.set({ approvedlist: localApprovedlist });
-    return "removedSafe";
+    return { command: "removedSafe", msg: null };
   }
   if (localBlockedlist.includes(url)) {
     localBlockedlist = localBlockedlist.filter((item) => item !== url);
     chrome.storage.local.set({ blockedlist: localBlockedlist });
-    return "removedBlocked";
+    return { command: "removedBlocked", msg: null };
   }
 }
 
@@ -178,19 +176,19 @@ async function addURL(newURL: string, listType: string) {
   var localBlockedlist = await fetchLocal("blockedlist");
   if (listType == "approvedlist") {
     if (localApprovedlist.includes(newURL)) {
-      return "existsSafe";
+      return { command: "existsSafe", msg: null };
     } else {
       localApprovedlist.push(newURL);
       chrome.storage.local.set({ approvedlist: localApprovedlist });
-      return "addedSafe";
+      return { command: "addedSafe", msg: null };
     }
   } else if (listType == "blockedlist") {
     if (localBlockedlist.includes(newURL)) {
-      return "existsBlocked";
+      return { command: "existsBlocked", msg: null };
     } else {
       localBlockedlist.push(newURL);
       chrome.storage.local.set({ blockedlist: localBlockedlist });
-      return "addedBlocked";
+      return { command: "addedBlocked", msg: null };
     }
   }
 }
@@ -201,37 +199,27 @@ async function checkURL(currelhost: string) {
   var serverApprovedList = await fetchLocal("serverApprovedList");
   var serverBlockedList = await fetchLocal("serverBlockedList");
 
-  var results = {
-    inUserApprovedlist: false,
-    inUserBlockedlist: false,
-    inServerApprovedlist: false,
-    inServerBlockedlist: false,
-  };
-
   if (localApprovedlist.includes(currelhost)) {
-    results["inUserApprovedlist"] = true;
+    return { command: "safeLocal", msg: null };
   } else if (localBlockedlist.includes(currelhost)) {
-    results["inUserBlockedlist"] = true;
-  } else if (serverApprovedList.includes(currelhost)) {
-    results["inServerApprovedlist"] = true;
-  } else if (serverBlockedList.includes(currelhost)) {
-    results["inServerBlockedlist"] = true;
-  }
-  return results;
-}
-
-async function run(currentHost: string) {
-  let results = await checkURL(currentHost);
-  if (results["inUserApprovedlist"]) {
-    return "safeLocal";
-  } else if (results["inServerApprovedlist"]) {
-    return "safeServer";
-  } else if (results["inUserBlockedlist"]) {
-    return "blockedLocal";
-  } else if (results["inServerBlockedlist"]) {
-    return "blockedServer";
+    return { command: "blockedLocal", msg: null };
+  } else if (currelhost in serverApprovedList) {
+    return { command: "safeServer", msg: null };
+  } else if (currelhost in serverBlockedList) {
+    let urls = [];
+    Object.entries(serverApprovedList).forEach((item) => {
+      if (item[1] === serverBlockedList[currelhost]) {
+        urls.push(item[0]);
+      }
+    });
+    if (urls.length > 0) {
+      console.log("sending", urls);
+      return { command: "blockedServer", msg: urls };
+    } else {
+      return { command: "blockedServer", msg: [] };
+    }
   } else {
-    return "notFound";
+    return { command: "notFound", msg: null };
   }
 }
 
@@ -251,16 +239,22 @@ const db = getFirestore();
 async function fetchServer(listType: string) {
   const querySnapshot = await getDocs(collection(db, listType));
   let urlList = [];
+  let data = {};
+  let i = 0;
   querySnapshot.forEach((doc) => {
     if (doc.data().URLs !== undefined) {
       for (const elem of doc.data().URLs) {
+        if (i > 10) {
+        }
+        i++;
         if (elem.URL !== undefined) {
           urlList.push(elem.URL);
+          data[elem.URL] = doc.id;
         }
       }
     }
   });
-  return urlList;
+  return data;
 }
 
 function updateDurationSetting(doc: DocumentData, alarmName: string) {
@@ -310,7 +304,6 @@ async function cacheServer() {
   console.log("serverUpdate", serverUpdate);
   if (serverUpdate !== undefined && serverUpdate) {
     let safeUrl = await fetchServer("approved_links");
-    console.log("safeURL", safeUrl);
     chrome.storage.local.set({ serverApprovedList: safeUrl });
     let blockedUrl = await fetchServer("malicious_links");
     chrome.storage.local.set({ serverBlockedList: blockedUrl });
@@ -383,8 +376,8 @@ chrome.tabs.onUpdated.addListener(function (tabNum, changeInfo, tab) {
     if (isURL(tab.url)) {
       var tmpURL = new URL(tab.url);
       let url = tmpURL.hostname.toLowerCase();
-      run(url).then((result) => {
-        checkRunResult(result, url, tabNum);
+      checkURL(url).then((result) => {
+        checkRunResult(result["command"], url, tabNum);
       });
     }
   }
@@ -398,8 +391,8 @@ chrome.tabs.onActivated.addListener(function (info) {
       if (isURL(tab.url)) {
         var tmpURL = new URL(tab.url);
         let url = tmpURL.hostname.toLowerCase();
-        run(url).then((result) => {
-          checkRunResult(result, url, info.tabId);
+        checkURL(url).then((result) => {
+          checkRunResult(result["command"], url, info.tabId);
         });
       }
     }

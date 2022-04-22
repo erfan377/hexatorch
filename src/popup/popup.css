@@ -112,3 +112,7 @@ input:focus{
   color: #6d747d !important;
   text-align: center;
 }
+
+.link {
+  color: aqua;
+}
