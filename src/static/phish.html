@@ -9,9 +9,9 @@
         display: flex;
         justify-content: center;
         flex-direction: column;
-        width: 25%;
         margin: auto;
         text-align: center;
+        font-family: sans-serif;
       }
       .row {
         flex-direction: row;
@@ -27,18 +27,71 @@
       .options {
         font-size: 18px;
       }
+      .image {
+        align-self: center;
+        margin-top: 20px;
+        width: 400px;
+      }
+      .warningmsg {
+        text-align: center;
+        font-family: sans-serif;
+        color: #7A7A7A;
+        margin-bottom: 15px;
+      }
+      .head{
+        color: red;
+      }
+      .safebutton{
+        color: #FFF;
+        background: #7BD37A;
+        padding: 20px;
+        border-radius: 20px;
+        cursor: pointer;
+        border: none;
+        font-weight: 700;
+        font-size: 20px;
+        outline: none;
+        transition: all 0.3s;
+      }
+      .safebutton:hover {
+        background: #B9D6B8;
+        color: #FFF;
+      }
+      .nonsafebutton{
+        color: #FFF;
+        background: #EF645C;
+        padding: 20px;
+        border-radius: 20px;
+        cursor: pointer;
+        border: none;
+        font-weight: 700;
+        font-size: 20px;
+        outline: none;
+        transition: all 0.3s;
+      }
+      .nonsafebutton:hover {
+        background: #EEBEBB;
+        color: #FFF;
+      }
+
     </style>
+
     <link rel="icon" href="logo_16.png" type="image/x-icon" />
   </head>
   <body>
     <div class="center">
-      <img src="./logo_notsecure_128.png" />
-      <h1>HexaTorch Warning</h1>
-      <h1>Phishing Detected</h1>
-      <p id="reason"></p>
+      <img  class="image" src="./html.png" />
+      <h1 class="head">PHISHING ALERT!</h1>
+      <h2 class="warningmsg"> HexaTorch has detected this URL address to be malicious. Interacting with this website my compromise your wallet.</p>
+      <p id="reason"></h2>
+        <div className="content">
+          <button id="Safe" class="safebutton">Redirect to the official website</button>
+          <button id="nonSafe" class="nonsafebutton">Proceed anyways</button>
+
+          
+
+           
       <div class="row options">
-        <a id="real" href=""></a>
-        <a class="danger" id="proceed" href="">Proceed anyway (danger)</a>
       </div>
     </div>
     <script src="phish.js"></script>

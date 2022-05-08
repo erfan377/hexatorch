@@ -37,7 +37,7 @@ export const Container = styled.button<ButtonProps>`
   padding: 10px;
   margin-left: .5rem;
   margin-right: .5rem;
-  margin-bottom: 30px;
+  margin-bottom: 0px;
   cursor: pointer;
   border: none;
   border-radius: 10px;

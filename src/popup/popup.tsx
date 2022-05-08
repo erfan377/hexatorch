@@ -103,31 +103,26 @@ const NameForm = () => {
     chrome.tabs.create({ url: website });
   }
 
+  function handleClick() {
+      const link = "https://" + correctAddress[0];
+      window.open(link);
+  }
+
   function showBlockedStateServer() {
+    console.log('"https://" + correctAddress[0]');
     return (
       <div>
         <img className="lockmain" src={lock_unsecure} />
-        <div className="content">
+        <div>
           <p className="report">
             This domain has been blocked by <strong>HexaTorch</strong>.
           </p>
-          <div>
-            {correctAddress.map((address) => {
-              const link = "https://" + address;
-              return (
-                <span
-                  onClick={() => {
-                    openLink(link);
-                  }}
-                >
-                  Visit{" "}
-                  <a href={link} className="link">
-                    {address}
-                  </a>{" "}
-                  for correct website.
-                </span>
-              );
-            })}
+          <div className="report">
+              <button
+                type="button"
+                className="redirectbutton"
+                onClick={handleClick}> Redirect to the official website
+              </button>
           </div>
         </div>
       </div>
@@ -374,19 +369,17 @@ const NameForm = () => {
 
   function contact() {
     return (
-      <div>
-        <p>
-          Got Feedback? Tweet
-          <a
-            href="https://twitter.com/intent/tweet?screen_name=hexatorch&ref_src=twsrc%5Etfw"
-            className="link"
+      <div className="content">
+        <p className= "supporttext">
+          Got feedback? 
+          <a className="supportlink"
+            href="https://hr5d4z0y8hn.typeform.com/to/o8GuHXti"
             onClick={() => {
               openLink(
-                "https://twitter.com/intent/tweet?screen_name=hexatorch&ref_src=twsrc%5Etfw"
+                "https://hr5d4z0y8hn.typeform.com/to/o8GuHXti"
               );
             }}
-          >
-            @HexaTorch
+          > Let us know.
           </a>
         </p>
       </div>
